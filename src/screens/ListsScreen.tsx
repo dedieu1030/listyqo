@@ -231,25 +231,29 @@ export const ListsScreen = ({ navigation }: any) => {
                   />
                   <View style={styles.carouselFooter}>
                     <View style={styles.paginationRow}>
-                      {lists.map((_, i) => {
-                        const ITEM_WIDTH = width * 0.75;
-                        const scaleX = scrollX.interpolate({
-                          inputRange: [(i - 1) * ITEM_WIDTH, i * ITEM_WIDTH, (i + 1) * ITEM_WIDTH],
-                          outputRange: [1, 2.5, 1],
-                          extrapolate: 'clamp'
-                        });
-                        const dotOpacity = scrollX.interpolate({
-                          inputRange: [(i - 1) * ITEM_WIDTH, i * ITEM_WIDTH, (i + 1) * ITEM_WIDTH],
-                          outputRange: [0.2, 0.8, 0.2],
-                          extrapolate: 'clamp'
-                        });
-                        return (
-                          <Animated.View 
-                            key={i} 
-                            style={[styles.dot, { opacity: dotOpacity, transform: [{ scaleX }] }]} 
-                          />
-                        );
-                      })}
+                      {lists.map((_, i) => (
+                         <View key={i} style={[styles.dot, { opacity: 0.2 }]} />
+                      ))}
+                      
+                      {lists.length > 0 && (
+                        <Animated.View 
+                          style={[
+                            styles.dot, 
+                            { 
+                              position: 'absolute', 
+                              left: 8, // matches the left margin of the first static dot
+                              opacity: 0.8,
+                              transform: [{
+                                translateX: scrollX.interpolate({
+                                  inputRange: lists.map((_, i) => i * (width * 0.75)),
+                                  outputRange: lists.map((_, i) => i * 24), // 8(width) + 8(left margin) + 8(right margin)
+                                  extrapolate: 'clamp'
+                                })
+                              }]
+                            }
+                          ]} 
+                        />
+                      )}
                     </View>
                     <Text style={styles.swipeText}>Swipe To Next List</Text>
                   </View>
