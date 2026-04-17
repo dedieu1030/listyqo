@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
   userCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surfaceActive,
+    backgroundColor: Colors.surface,
     padding: 20,
     borderRadius: 16,
     marginBottom: 40,
@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surfaceActive,
+    backgroundColor: Colors.surface,
     padding: 16,
     borderRadius: 16,
     marginBottom: 12,

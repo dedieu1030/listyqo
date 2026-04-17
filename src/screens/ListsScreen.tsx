@@ -130,13 +130,11 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   cardInactive: {
-    backgroundColor: Colors.surfaceInactive,
-    borderWidth: 1,
-    borderColor: Colors.border,
+    backgroundColor: Colors.surface,
     width: '88%', // Maintains wide horizontal margins
   },
   cardActive: {
-    backgroundColor: Colors.surfaceActive,
+    backgroundColor: Colors.surface,
     width: '94%', // Overhangs the inactive margins!
     // Very soft, high spread shadow giving that floating effect over white bg
   },
@@ -168,9 +166,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.surfaceInactive,
-    borderWidth: 1,
-    borderColor: Colors.border,
+    backgroundColor: Colors.surface,
     paddingHorizontal: 24,
     paddingVertical: 16,
     borderRadius: 30,
@@ -186,7 +182,7 @@ const styles = StyleSheet.create({
     left: 20,
     right: 20,
     flexDirection: 'row',
-    backgroundColor: Colors.surfaceActive,
+    backgroundColor: Colors.surface,
     borderRadius: 16,
     padding: 12,
     alignItems: 'center',

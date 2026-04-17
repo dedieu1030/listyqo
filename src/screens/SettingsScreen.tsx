@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
     lineHeight: 36,
   },
   section: {
-    backgroundColor: Colors.surfaceActive,
+    backgroundColor: Colors.surface,
     borderRadius: 16,
     paddingHorizontal: 16,
     paddingVertical: 8,

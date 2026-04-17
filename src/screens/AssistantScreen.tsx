@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
   voiceCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surfaceActive,
+    backgroundColor: Colors.surface,
     borderRadius: 16,
     padding: 24,
     width: '100%',

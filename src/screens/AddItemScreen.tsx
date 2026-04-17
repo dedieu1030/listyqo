@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surfaceActive,
+    backgroundColor: Colors.surface,
     borderRadius: 16,
     paddingHorizontal: 16,
     paddingVertical: 12,
@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   tag: {
-    backgroundColor: Colors.surfaceInactive,
+    backgroundColor: Colors.surface,
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 10,

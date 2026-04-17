@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surfaceInactive,
+    backgroundColor: Colors.surface,
     marginHorizontal: 20,
     borderRadius: 12,
     paddingHorizontal: 12,
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: Colors.surfaceInactive,
+    backgroundColor: Colors.surface,
   },
   pillActive: {
     backgroundColor: Colors.highlightPill,

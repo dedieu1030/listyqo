@@ -124,14 +124,12 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   input: {
-    backgroundColor: Colors.surfaceActive,
+    backgroundColor: Colors.surface,
     borderRadius: 12,
     padding: 16,
     fontFamily: 'Inter_500Medium',
     fontSize: 16,
     color: Colors.textHeading,
-    borderWidth: 1,
-    borderColor: Colors.border,
   },
   row: {
     flexDirection: 'row',
@@ -145,8 +143,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: Colors.surface,
     borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.border,
     height: 52,
   },
   qtyBtn: {
