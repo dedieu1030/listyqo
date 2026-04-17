@@ -1,15 +1,19 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Dimensions, Animated } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Dimensions, Animated, Pressable, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../theme/colors';
 import { useStore } from '../store';
-import { User, ChevronUp, CheckCircle, Plus, Trash2, LayoutGrid, LayoutList } from 'lucide-react-native';
+import { User, ChevronUp, CheckCircle, Plus, Trash2, LayoutGrid, LayoutList, Check } from 'lucide-react-native';
 import Svg, { Path, Circle } from 'react-native-svg';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = width * 0.72;
 const SPACING = 16;
 const FULL_SIZE = CARD_WIDTH + SPACING;
+
+const TODAY_ROW_MIN = 52;
+const CHECKBOX_SIZE = 22;
+const SEPARATOR = Platform.OS === 'ios' ? StyleSheet.hairlineWidth : 1;
 
 // A decorative element mimicking the daisy from the reference image
 const MockDaisy = ({ size = 40, color = "#FFFFFF" }) => (
@@ -349,27 +353,82 @@ export const ListsScreen = ({ navigation }: any) => {
           </View>
         )}
 
-        {/* TODAY Section placeholder remains same scale but also supports swap? Minimalist logic for now */}
         {activeTab === 'today' && (
           <View style={styles.contentSection}>
             <View style={styles.todayDateHeader}>
               <Text style={styles.todayWeekday}>{todayWeekday}</Text>
               <Text style={styles.todayFullDate}>{todayFullDate}</Text>
             </View>
-            {/* List for today items as updated before */}
-            {todayItems.map((item, index) => (
-                <View key={item.id} style={styles.listItemRow}>
-                  <View style={styles.rowContentCompact}>
-                    <TouchableOpacity style={[styles.colorSquareSmall, { backgroundColor: cardColors[index % cardColors.length] }]}>
-                      <MockDaisy size={24} />
-                    </TouchableOpacity>
-                    <View style={styles.listDetailsCompact}>
-                      <Text style={styles.itemText}>{item.name}</Text>
-                      <Trash2 size={18} color="#CC0000" />
+
+            <View style={styles.todayFoodList}>
+              {todayItems.map((item) => (
+                <View key={item.id} style={styles.todayRow}>
+                  <Pressable
+                    style={styles.todayRowMain}
+                    onPress={() => toggleTodayItem(item.id)}
+                    android_ripple={{ color: 'rgba(0,0,0,0.06)' }}
+                  >
+                    <View style={styles.todayCheckboxSlot}>
+                      <View
+                        style={[
+                          styles.todayCheckboxBox,
+                          item.checked && styles.todayCheckboxBoxChecked,
+                        ]}
+                      >
+                        {item.checked ? (
+                          <Check size={14} color="#FFFFFF" strokeWidth={3} />
+                        ) : null}
+                      </View>
                     </View>
-                  </View>
+                    <Text
+                      style={[styles.todayItemLabel, item.checked && styles.todayItemLabelDone]}
+                      numberOfLines={2}
+                    >
+                      {item.name}
+                    </Text>
+                  </Pressable>
+                  <TouchableOpacity
+                    style={styles.todayDeleteBtn}
+                    onPress={() => deleteTodayItem(item.id)}
+                    hitSlop={{ top: 12, bottom: 12, left: 8, right: 8 }}
+                    accessibilityLabel="Delete item"
+                  >
+                    <Trash2 size={18} color="#FF3B30" />
+                  </TouchableOpacity>
                 </View>
-            ))}
+              ))}
+
+              {newTodayItemMode ? (
+                <View style={[styles.todayRow, styles.todayAddRow]}>
+                  <View style={styles.todayCheckboxSlot} />
+                  <TextInput
+                    style={styles.todayAddInput}
+                    value={newTodayItemName}
+                    onChangeText={setNewTodayItemName}
+                    placeholder="New item"
+                    placeholderTextColor={Colors.textLight}
+                    onSubmitEditing={handleAddTodayItem}
+                    returnKeyType="done"
+                    blurOnSubmit={false}
+                    autoFocus
+                  />
+                  <TouchableOpacity onPress={() => { setNewTodayItemName(''); setNewTodayItemMode(false); }}>
+                    <Text style={styles.todayAddCancel}>Cancel</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <Pressable
+                  style={({ pressed }) => [styles.todayRow, pressed && styles.todayRowPressed]}
+                  onPress={() => setNewTodayItemMode(true)}
+                  android_ripple={{ color: 'rgba(0,0,0,0.06)' }}
+                >
+                  <View style={styles.todayCheckboxSlot}>
+                    <Plus size={22} color={Colors.textHeading} strokeWidth={2.5} />
+                  </View>
+                  <Text style={styles.todayAddHint}>Add item</Text>
+                </Pressable>
+              )}
+            </View>
           </View>
         )}
 
@@ -412,6 +471,95 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     color: Colors.textLight,
     marginTop: 6,
+  },
+  todayFoodList: {
+    marginHorizontal: 24,
+    borderTopWidth: SEPARATOR,
+    borderTopColor: Colors.listDivider,
+    backgroundColor: Colors.background,
+  },
+  todayRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    minHeight: TODAY_ROW_MIN,
+    borderBottomWidth: SEPARATOR,
+    borderBottomColor: Colors.listDivider,
+    backgroundColor: Colors.background,
+  },
+  todayRowPressed: {
+    backgroundColor: 'rgba(0,0,0,0.03)',
+  },
+  todayRowMain: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    minHeight: TODAY_ROW_MIN,
+    paddingLeft: 0,
+  },
+  todayCheckboxSlot: {
+    width: 40,
+    minHeight: TODAY_ROW_MIN,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  todayCheckboxBox: {
+    width: CHECKBOX_SIZE,
+    height: CHECKBOX_SIZE,
+    borderRadius: 5,
+    borderWidth: 2,
+    borderColor: '#C7C7CC',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.background,
+  },
+  todayCheckboxBoxChecked: {
+    backgroundColor: Colors.black,
+    borderColor: Colors.black,
+  },
+  todayItemLabel: {
+    flex: 1,
+    fontFamily: 'Inter_400Regular',
+    fontSize: 17,
+    lineHeight: 22,
+    color: Colors.textHeading,
+    paddingVertical: 14,
+    paddingRight: 8,
+  },
+  todayItemLabelDone: {
+    color: Colors.textLight,
+    textDecorationLine: 'line-through',
+  },
+  todayDeleteBtn: {
+    width: 44,
+    minHeight: TODAY_ROW_MIN,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  todayAddRow: {
+    paddingRight: 12,
+  },
+  todayAddInput: {
+    flex: 1,
+    fontFamily: 'Inter_400Regular',
+    fontSize: 17,
+    lineHeight: 22,
+    color: Colors.textHeading,
+    paddingVertical: 12,
+    marginRight: 8,
+    minHeight: 44,
+  },
+  todayAddCancel: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 15,
+    color: '#FF3B30',
+  },
+  todayAddHint: {
+    flex: 1,
+    fontFamily: 'Inter_400Regular',
+    fontSize: 17,
+    lineHeight: 22,
+    color: Colors.textLight,
+    paddingVertical: 14,
   },
   
   // Carousel Specific

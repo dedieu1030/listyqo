@@ -15,4 +15,6 @@ export const Colors = {
   highlightPill: '#E8E6DF', 
   highlightIcon: '#E85D36', 
   border: '#F0EFEA', // Internal separators
+  /** Row dividers (e.g. Today list) — visible on white, not harsh */
+  listDivider: '#D1D1D6',
 };
