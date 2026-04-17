@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Switch } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../theme/colors';
-import { ChevronLeft } from 'lucide-react-native';
+import { ArrowLeft2 } from 'iconsax-react-native';
 
 export const SettingsScreen = ({ navigation }: any) => {
   const [openLastList, setOpenLastList] = useState(false);
@@ -13,7 +13,7 @@ export const SettingsScreen = ({ navigation }: any) => {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <ChevronLeft size={28} color={Colors.black} />
+          <ArrowLeft2 size={28} color={Colors.black} variant="Bold" />
         </TouchableOpacity>
         <Text style={styles.title}>Settings</Text>
         <View style={styles.headerRight} />

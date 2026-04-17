@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-nativ
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../theme/colors';
 import { useStore } from '../store';
-import { ChevronLeft, Minus, Plus } from 'lucide-react-native';
+import { ArrowLeft2, MinusCirlce, AddCircle } from 'iconsax-react-native';
 
 export const ItemDetailsScreen = ({ route, navigation }: any) => {
   const { listId, item } = route.params;
@@ -32,7 +32,7 @@ export const ItemDetailsScreen = ({ route, navigation }: any) => {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <ChevronLeft size={28} color={Colors.black} />
+          <ArrowLeft2 size={28} color={Colors.black} variant="Bold" />
         </TouchableOpacity>
         <Text style={styles.title}>Edit Item</Text>
         <TouchableOpacity onPress={handleSave}>
@@ -53,7 +53,7 @@ export const ItemDetailsScreen = ({ route, navigation }: any) => {
             <Text style={styles.label}>Quantity</Text>
             <View style={styles.qtyContainer}>
               <TouchableOpacity style={styles.qtyBtn} onPress={decrementQty}>
-                <Minus size={20} color={Colors.black} />
+                <MinusCirlce size={20} color={Colors.black} variant="Bold" />
               </TouchableOpacity>
               <TextInput 
                 style={styles.qtyInput} 
@@ -62,7 +62,7 @@ export const ItemDetailsScreen = ({ route, navigation }: any) => {
                 keyboardType="numeric"
               />
               <TouchableOpacity style={styles.qtyBtn} onPress={incrementQty}>
-                <Plus size={20} color={Colors.black} />
+                <AddCircle size={20} color={Colors.black} variant="Bold" />
               </TouchableOpacity>
             </View>
           </View>

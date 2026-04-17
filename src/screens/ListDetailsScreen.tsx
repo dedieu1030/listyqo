@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, Keyboard
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../theme/colors';
 import { useStore } from '../store';
-import { Trash, Share, Plus, Check } from 'lucide-react-native';
+import { Trash, Share, AddCircle, TickCircle } from 'iconsax-react-native';
 
 export const ListDetailsScreen = ({ route, navigation }: any) => {
   const { listId, listName } = route.params;
@@ -38,7 +38,7 @@ export const ListDetailsScreen = ({ route, navigation }: any) => {
           disabled={isEditing && isFocused} // Prevent toggle when explicitly editing name
         >
           <View style={styles.checkbox}>
-            {isChecked && <Check color={Colors.black} size={16} strokeWidth={3} />}
+            {isChecked && <TickCircle color={Colors.black} size={16} variant="Bold" />}
           </View>
         </TouchableOpacity>
 
@@ -95,7 +95,7 @@ export const ListDetailsScreen = ({ route, navigation }: any) => {
               navigation.goBack();
             }}
           >
-            <Trash color={Colors.accentRed} size={24} strokeWidth={2} />
+            <Trash color={Colors.accentRed} size={24} variant="Bold" />
           </TouchableOpacity>
           
           <Text style={styles.title} numberOfLines={1}>List</Text>
@@ -119,7 +119,7 @@ export const ListDetailsScreen = ({ route, navigation }: any) => {
               style={styles.headerRightAction}
               onPress={() => setIsEditing(true)}
             >
-              <Share color={Colors.accentRed} size={22} strokeWidth={2} style={{ marginRight: 6 }} />
+              <Share color={Colors.accentRed} size={22} variant="Bold" style={{ marginRight: 6 }} />
               <Text style={styles.actionText}>Edit</Text>
             </TouchableOpacity>
           )}
@@ -137,7 +137,7 @@ export const ListDetailsScreen = ({ route, navigation }: any) => {
           
           {!isEditing && (
             <TouchableOpacity style={styles.addRow} onPress={handleCreateNewItem}>
-              <Plus color={Colors.black} size={24} strokeWidth={2} />
+              <AddCircle color={Colors.black} size={24} variant="Bold" />
             </TouchableOpacity>
           )}
         </ScrollView>

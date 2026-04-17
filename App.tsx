@@ -3,7 +3,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { Home, Target, Users, Binoculars } from 'lucide-react-native';
+import { House, Profile } from 'iconsax-react-native';
 import { StatusBar } from 'expo-status-bar';
 
 import { 
@@ -19,7 +19,7 @@ import { Lora_400Regular, Lora_500Medium, Lora_600SemiBold, Lora_700Bold } from 
 import { Colors } from './src/theme/colors';
 import { 
   ListsScreen, ListDetailsScreen, AddItemScreen, ItemDetailsScreen, 
-  FoodFactsScreen, AssistantScreen, ProfileScreen, SettingsScreen 
+  ProfileScreen, SettingsScreen 
 } from './src/screens';
 
 const Tab = createBottomTabNavigator();
@@ -91,31 +91,15 @@ export default function App() {
           name="ListsTab" 
           component={ListsStack} 
           options={{
-            tabBarIcon: ({ color, size, focused }) => <Home color={color} size={24} strokeWidth={focused ? 2.5 : 2} />,
+            tabBarIcon: ({ color }) => <House color={color} size={24} variant="Bold" />,
             tabBarLabel: 'Home' 
-          }} 
-        />
-        <Tab.Screen 
-          name="FoodFactsTab" 
-          component={FoodFactsScreen} 
-          options={{
-            tabBarIcon: ({ color, size, focused }) => <Target color={color} size={24} strokeWidth={focused ? 2.5 : 2} />,
-            tabBarLabel: 'Review'
-          }} 
-        />
-        <Tab.Screen 
-          name="AssistantTab" 
-          component={AssistantScreen} 
-          options={{
-            tabBarIcon: ({ color, size, focused }) => <Users color={color} size={24} strokeWidth={focused ? 2.5 : 2} />,
-            tabBarLabel: 'Live'
           }} 
         />
         <Tab.Screen 
           name="ProfileTab" 
           component={ProfileStack} 
           options={{
-            tabBarIcon: ({ color, size, focused }) => <Binoculars color={color} size={24} strokeWidth={focused ? 2.5 : 2} />,
+            tabBarIcon: ({ color }) => <Profile color={color} size={24} variant="Bold" />,
             tabBarLabel: 'Explore'
           }} 
         />

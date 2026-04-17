@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../theme/colors';
-import { User, Settings, Sparkles, Heart } from 'lucide-react-native';
+import { Profile, Settings, Star, Heart } from 'iconsax-react-native';
 
 export const ProfileScreen = ({ navigation }: any) => {
   return (
@@ -14,7 +14,7 @@ export const ProfileScreen = ({ navigation }: any) => {
       <View style={styles.content}>
         <View style={styles.userCard}>
           <View style={styles.avatar}>
-            <User color={Colors.white} size={32} />
+            <Profile color={Colors.white} size={32} variant="Bold" />
           </View>
           <View style={styles.userInfo}>
             <Text style={styles.userName}>Guest User</Text>
@@ -29,21 +29,21 @@ export const ProfileScreen = ({ navigation }: any) => {
           onPress={() => navigation.navigate('Settings')}
         >
           <View style={[styles.iconContainer, { backgroundColor: '#F0F0F0' }]}>
-            <Settings size={20} color={Colors.textHeading} />
+            <Settings size={20} color={Colors.textHeading} variant="Bold" />
           </View>
           <Text style={styles.menuText}>Settings</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.menuItem}>
           <View style={[styles.iconContainer, { backgroundColor: '#FFF0E5' }]}>
-            <Sparkles size={20} color={Colors.primary} />
+            <Star size={20} color={Colors.primary} variant="Bold" />
           </View>
           <Text style={styles.menuText}>Appearance</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.menuItem}>
           <View style={[styles.iconContainer, { backgroundColor: '#FFE5E5' }]}>
-            <Heart size={20} color="#FF3B30" />
+            <Heart size={20} color="#FF3B30" variant="Bold" />
           </View>
           <Text style={styles.menuText}>Feedback & Rating</Text>
         </TouchableOpacity>
