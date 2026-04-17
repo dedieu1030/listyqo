@@ -1,8 +1,32 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, TextInput } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, TextInput, Dimensions } from 'react-native';
 import { Colors } from '../theme/colors';
 import { useStore } from '../store';
 import { User, ChevronUp, CheckCircle, Plus } from 'lucide-react-native';
+import Svg, { Path, Circle } from 'react-native-svg';
+
+const { width } = Dimensions.get('window');
+
+// A decorative element mimicking the daisy from the reference image
+const MockDaisy = ({ color = "#FFFFFF" }) => (
+  <View style={styles.decorativeWrapper}>
+    <Svg width="40" height="40" viewBox="0 0 100 100">
+      {/* Petitioner shapes to mimic a daisy */}
+      <Circle cx="50" cy="50" r="15" fill="#FBC02D" />
+      <Path 
+        d="M50 35 Q55 20 50 5 Q45 20 50 35 
+           M65 50 Q80 55 95 50 Q80 45 65 50 
+           M50 65 Q55 80 50 95 Q45 80 50 65 
+           M35 50 Q20 55 5 50 Q20 45 35 50
+           M60 40 Q75 30 85 40 Q75 50 60 40
+           M40 40 Q25 30 15 40 Q25 50 40 40
+           M60 60 Q75 70 85 60 Q75 50 60 60
+           M40 60 Q25 70 15 60 Q25 50 40 60" 
+        fill={color} 
+      />
+    </Svg>
+  </View>
+);
 
 export const ListsScreen = ({ navigation }: any) => {
   const { lists, addList } = useStore();
@@ -25,7 +49,7 @@ export const ListsScreen = ({ navigation }: any) => {
     <SafeAreaView style={styles.safeArea}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         
-        {/* Header Area */}
+        {/* Header Area Area */}
         <View style={styles.headerArea}>
           <View style={styles.topHeaderRow}>
             <Text style={styles.mainTitle}>Hi, Jamie</Text>
@@ -34,27 +58,33 @@ export const ListsScreen = ({ navigation }: any) => {
 
           {/* Tabs Row */}
           <View style={styles.tabsRow}>
-            <TouchableOpacity 
-              style={[styles.tabBtn, activeTab === 'today' && styles.tabBtnActive]}
-              onPress={() => setActiveTab('today')}
-            >
-              <Text style={[styles.tabText, activeTab === 'today' && styles.tabTextActive]}>Today</Text>
-            </TouchableOpacity>
+            <View>
+              <TouchableOpacity 
+                style={styles.tabBtn}
+                onPress={() => setActiveTab('today')}
+              >
+                <Text style={[styles.tabText, activeTab === 'today' && styles.tabTextActive]}>Today</Text>
+              </TouchableOpacity>
+              {activeTab === 'today' && <View style={styles.tabUnderline} />}
+            </View>
             
-            <TouchableOpacity 
-              style={[styles.tabBtn, activeTab === 'week' && styles.tabBtnActive]}
-              onPress={() => setActiveTab('week')}
-            >
-              <Text style={[styles.tabText, activeTab === 'week' && styles.tabTextActive]}>This Week</Text>
-            </TouchableOpacity>
+            <View>
+              <TouchableOpacity 
+                style={styles.tabBtn}
+                onPress={() => setActiveTab('week')}
+              >
+                <Text style={[styles.tabText, activeTab === 'week' && styles.tabTextActive]}>Learning Plan</Text>
+              </TouchableOpacity>
+              {activeTab === 'week' && <View style={styles.tabUnderline} />}
+            </View>
           </View>
         </View>
 
         {activeTab === 'week' && (
           <View style={styles.contentSection}>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Your saved lists{"\n"}for the week</Text>
-              <ChevronUp size={24} color="#111" strokeWidth={3} />
+              <Text style={styles.sectionTitle}>Greet people and{"\n"}say goodbye</Text>
+              <ChevronUp size={24} color="#111" strokeWidth={2.5} />
             </View>
 
             {lists.length === 0 ? (
@@ -68,34 +98,40 @@ export const ListsScreen = ({ navigation }: any) => {
 
                 return (
                   <View key={list.id} style={[styles.listItemRow, isFocused && styles.listItemRowFocused]}>
-                    <TouchableOpacity 
-                      activeOpacity={0.8}
-                      onPress={() => navigation.navigate('ListDetails', { listId: list.id, listName: list.name })}
-                      style={[styles.colorSquare, { backgroundColor: cardColors[index % cardColors.length] }]}
-                    >
-                      <Text style={styles.squareTitle}>{list.name}</Text>
-                      <View style={styles.squareBottom}>
-                        <Text style={styles.squareSubtitle}>List {index + 1}</Text>
-                        {isCompleted && <CheckCircle size={22} color="#111" strokeWidth={2.5} />}
-                      </View>
-                    </TouchableOpacity>
+                    <View style={styles.rowContent}>
+                        <TouchableOpacity 
+                          activeOpacity={0.8}
+                          onPress={() => navigation.navigate('ListDetails', { listId: list.id, listName: list.name })}
+                          style={[styles.colorSquare, { backgroundColor: cardColors[index % cardColors.length] }]}
+                        >
+                          <Text style={styles.squareTitle}>{list.name}</Text>
+                          
+                          {/* Decorative daisy element as seen in Lesson 2 */}
+                          {index % 2 === 1 && <MockDaisy />}
 
-                    <View style={styles.listDetails}>
-                      <Text style={styles.listDesc}>
-                        {isFocused 
-                          ? "View the items you added and easily manage your grocery list" 
-                          : "Review your saved items and get ready for the trip"
-                        }
-                      </Text>
-                      
-                      <TouchableOpacity 
-                        style={isFocused ? styles.btnPrimary : styles.btnPlain}
-                        onPress={() => navigation.navigate('ListDetails', { listId: list.id, listName: list.name })}
-                      >
-                        <Text style={isFocused ? styles.btnPrimaryText : styles.btnPlainText}>
-                          {isFocused ? 'Start now' : (isCompleted ? 'Repeat' : 'Start')}
-                        </Text>
-                      </TouchableOpacity>
+                          <View style={styles.squareBottom}>
+                            <Text style={styles.squareSubtitle}>Lesson {index + 1}</Text>
+                            {isCompleted && <CheckCircle size={20} color="#111" strokeWidth={2.5} />}
+                          </View>
+                        </TouchableOpacity>
+
+                        <View style={styles.listDetails}>
+                          <Text style={styles.listDesc}>
+                            {isFocused 
+                              ? "Learn to say which languages you speak" 
+                              : "Learn how to greet someone and say goodbye."
+                            }
+                          </Text>
+                          
+                          <TouchableOpacity 
+                            style={isFocused ? styles.btnPrimary : styles.btnPlain}
+                            onPress={() => navigation.navigate('ListDetails', { listId: list.id, listName: list.name })}
+                          >
+                            <Text style={isFocused ? styles.btnPrimaryText : styles.btnPlainText}>
+                              {isFocused ? 'Start now' : (isCompleted ? 'Repeat' : 'Start')}
+                            </Text>
+                          </TouchableOpacity>
+                        </View>
                     </View>
                   </View>
                 );
@@ -135,7 +171,7 @@ export const ListsScreen = ({ navigation }: any) => {
         {activeTab === 'today' && (
           <View style={styles.todaySection}>
              <Text style={styles.emptyText}>You haven't scheduled any specific lists for today.</Text>
-             <TouchableOpacity style={styles.btnPrimary} onPress={() => setActiveTab('week')}>
+             <TouchableOpacity style={styles.btnPrimaryCenter} onPress={() => setActiveTab('week')}>
                 <Text style={styles.btnPrimaryText}>Browse Week</Text>
              </TouchableOpacity>
           </View>
@@ -149,48 +185,51 @@ export const ListsScreen = ({ navigation }: any) => {
 const styles = StyleSheet.create({
   safeArea: { 
     flex: 1, 
-    backgroundColor: Colors.background 
+    backgroundColor: '#FFFFFF' 
   },
   scrollContent: {
     paddingBottom: 40,
   },
   headerArea: {
     paddingHorizontal: 24,
-    paddingTop: 30, // Brought down slightly
-    paddingBottom: 10,
+    paddingTop: 20,
+    paddingBottom: 20,
   },
   topHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 30,
+    marginBottom: 20,
   },
   mainTitle: {
     fontFamily: 'Lora_700Bold',
-    fontSize: 42, // Massive beautiful Serif font
+    fontSize: 40,
     color: '#111',
   },
   tabsRow: {
     flexDirection: 'row',
-    gap: 24,
+    gap: 28,
   },
   tabBtn: {
-    paddingBottom: 8,
+    paddingBottom: 6,
   },
-  tabBtnActive: {
-    borderBottomWidth: 2,
-    borderBottomColor: '#111',
+  tabUnderline: {
+    height: 2,
+    backgroundColor: '#111',
+    width: '100%',
+    position: 'absolute',
+    bottom: 0,
   },
   tabText: {
     fontFamily: 'Inter_700Bold',
     fontSize: 16,
-    color: Colors.textLight,
+    color: '#8A8A8A',
   },
   tabTextActive: {
     color: '#111',
   },
   contentSection: {
-    // 
+    flex: 1,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -201,30 +240,40 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontFamily: 'Inter_800ExtraBold',
-    fontSize: 24,
-    lineHeight: 30,
+    fontSize: 26,
+    lineHeight: 32,
     color: '#111',
   },
   listItemRow: {
-    flexDirection: 'row',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    // Extremely flat, no borders/shadows!
+    width: '100%', // MUST BE FULL WIDTH FOR BACKGROUND
+    paddingVertical: 12,
   },
   listItemRowFocused: {
-    backgroundColor: Colors.surface, // Matches the warm #F5F4EE backdrop
+    backgroundColor: '#F5F4EE', // The warm grey selection container
+  },
+  rowContent: {
+    flexDirection: 'row',
+    paddingHorizontal: 24, // Content padding moved here
   },
   colorSquare: {
-    width: 150,
-    height: 130, // Large square like the image
-    borderRadius: 16,
+    width: 140,
+    height: 130, 
+    borderRadius: 20,
     padding: 16,
     justifyContent: 'space-between',
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  decorativeWrapper: {
+    position: 'absolute',
+    bottom: -10,
+    right: -10,
+    opacity: 0.9,
   },
   squareTitle: {
     fontFamily: 'Inter_800ExtraBold',
-    fontSize: 16,
-    color: '#111',
+    fontSize: 17,
+    color: '#000',
     lineHeight: 22,
   },
   squareBottom: {
@@ -235,27 +284,34 @@ const styles = StyleSheet.create({
   squareSubtitle: {
     fontFamily: 'Inter_500Medium',
     fontSize: 14,
-    color: '#111', 
+    color: '#000', 
   },
   listDetails: {
     flex: 1,
     marginLeft: 20,
     justifyContent: 'space-between',
-    paddingVertical: 6,
+    paddingVertical: 4,
   },
   listDesc: {
-    fontFamily: 'Inter_500Medium',
-    fontSize: 16,
+    fontFamily: 'Inter_400Regular',
+    fontSize: 15,
     color: '#666',
-    lineHeight: 22,
+    lineHeight: 20,
     paddingRight: 10,
   },
   btnPrimary: {
     backgroundColor: '#111',
-    alignSelf: 'flex-end',
+    alignSelf: 'flex-start',
     paddingHorizontal: 24,
     paddingVertical: 12,
-    borderRadius: 30, // pill button style
+    borderRadius: 30, 
+    marginTop: 8,
+  },
+  btnPrimaryCenter: {
+    backgroundColor: '#111',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 30, 
   },
   btnPrimaryText: {
     fontFamily: 'Inter_700Bold',
@@ -273,41 +329,30 @@ const styles = StyleSheet.create({
   },
   todaySection: {
     paddingHorizontal: 24,
-    paddingVertical: 40,
+    paddingVertical: 60,
     alignItems: 'center',
     gap: 20,
   },
-  emptyContainer: {
-    padding: 24,
-    alignItems: 'center',
-  },
-  emptyText: {
-    fontFamily: 'Inter_500Medium',
-    fontSize: 16,
-    color: Colors.textLight,
-    textAlign: 'center',
-    lineHeight: 24,
-  },
   creatorWrapper: {
-    paddingTop: 30,
+    paddingVertical: 30,
     paddingHorizontal: 24,
   },
   bottomCreateButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.surface,
+    backgroundColor: '#F5F4EE',
     paddingVertical: 16,
     borderRadius: 16,
   },
   bottomCreateButtonText: {
     fontFamily: 'Inter_700Bold',
     fontSize: 16,
-    color: Colors.textHeading,
+    color: '#111',
   },
   createInputContainer: {
     flexDirection: 'row',
-    backgroundColor: Colors.surface,
+    backgroundColor: '#F5F4EE',
     borderRadius: 16,
     padding: 12,
     alignItems: 'center',
@@ -317,7 +362,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontFamily: 'Inter_500Medium',
     fontSize: 16,
-    color: Colors.textHeading,
+    color: '#111',
     padding: 8,
   },
   saveButton: {
@@ -328,7 +373,7 @@ const styles = StyleSheet.create({
   },
   saveButtonText: {
     fontFamily: 'Inter_700Bold',
-    color: Colors.white,
+    color: '#FFF',
     fontSize: 14,
   },
   cancelButton: {
