@@ -80,7 +80,10 @@ export const ListsScreen = ({ navigation }: any) => {
     updateTodayItem,
   } = useStore();
   const [activeTab, setActiveTab] = useState<'today' | 'saved'>('saved');
-  const [isTodayEditing, setIsTodayEditing] = useState(false);
+  /** Lignes en mode édition (reste true pendant la fermeture animée). */
+  const [isTodayEditActive, setIsTodayEditActive] = useState(false);
+  /** Libellé du bouton : « Done » dès le tap, sans attendre la fin de l’anim de fermeture. */
+  const [todayEditButtonShowsDone, setTodayEditButtonShowsDone] = useState(false);
 
   const [newListMode, setNewListMode] = useState(false);
   const [newListName, setNewListName] = useState('');
@@ -92,11 +95,14 @@ export const ListsScreen = ({ navigation }: any) => {
   const todayDeleteAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    if (activeTab !== 'today') setIsTodayEditing(false);
+    if (activeTab !== 'today') {
+      setIsTodayEditActive(false);
+      setTodayEditButtonShowsDone(false);
+    }
   }, [activeTab]);
 
   useEffect(() => {
-    if (!isTodayEditing) return;
+    if (!isTodayEditActive) return;
 
     todayDeleteAnim.stopAnimation();
     todayDeleteAnim.setValue(0);
@@ -109,7 +115,7 @@ export const ListsScreen = ({ navigation }: any) => {
       }).start();
     });
     return () => cancelAnimationFrame(frame);
-  }, [isTodayEditing, todayDeleteAnim]);
+  }, [isTodayEditActive, todayDeleteAnim]);
 
   const handleCreateList = () => {
     if (newListName.trim().length > 0) {
@@ -134,7 +140,20 @@ export const ListsScreen = ({ navigation }: any) => {
   };
 
   const handleTodayEditPress = () => {
-    if (isTodayEditing) {
+    if (isTodayEditActive && !todayEditButtonShowsDone) {
+      setTodayEditButtonShowsDone(true);
+      todayDeleteAnim.stopAnimation();
+      Animated.timing(todayDeleteAnim, {
+        toValue: 1,
+        duration: TODAY_ANIM_MS,
+        easing: TODAY_ANIM_EASING,
+        useNativeDriver: true,
+      }).start();
+      return;
+    }
+
+    if (todayEditButtonShowsDone) {
+      setTodayEditButtonShowsDone(false);
       todayDeleteAnim.stopAnimation();
       Animated.timing(todayDeleteAnim, {
         toValue: 0,
@@ -147,12 +166,13 @@ export const ListsScreen = ({ navigation }: any) => {
         items.forEach((item) => {
           if (!item.name.trim()) del(item.id);
         });
-        setIsTodayEditing(false);
+        setIsTodayEditActive(false);
       });
       return;
     }
     if (newTodayItemMode) handleAddTodayItem();
-    setIsTodayEditing(true);
+    setTodayEditButtonShowsDone(true);
+    setIsTodayEditActive(true);
   };
 
   const cardColors = ['#A5E3C1', '#36C185', '#57C693', '#F2AE72', '#EED8A1'];
@@ -265,10 +285,10 @@ export const ListsScreen = ({ navigation }: any) => {
                 onPress={handleTodayEditPress}
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 accessibilityRole="button"
-                accessibilityLabel={isTodayEditing ? 'Done' : 'Edit'}
+                accessibilityLabel={todayEditButtonShowsDone ? 'Done' : 'Edit'}
               >
                 <Text style={styles.todayEditButton}>
-                  {isTodayEditing ? 'Done' : 'Edit'}
+                  {todayEditButtonShowsDone ? 'Done' : 'Edit'}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -276,7 +296,7 @@ export const ListsScreen = ({ navigation }: any) => {
             <View style={styles.todayFoodList}>
               {todayItems.map((item) => (
                 <View key={item.id} style={styles.todayItemCell}>
-                  {isTodayEditing ? (
+                  {isTodayEditActive ? (
                     <View style={styles.todayItemRowHost}>
                       <Animated.View
                         style={[
@@ -293,7 +313,7 @@ export const ListsScreen = ({ navigation }: any) => {
                             ],
                           },
                         ]}
-                        pointerEvents={isTodayEditing ? 'auto' : 'none'}
+                        pointerEvents={isTodayEditActive ? 'auto' : 'none'}
                       >
                         <TouchableOpacity
                           onPress={() => deleteTodayItem(item.id)}
@@ -391,7 +411,7 @@ export const ListsScreen = ({ navigation }: any) => {
                 </View>
               ))}
 
-              {!isTodayEditing && newTodayItemMode ? (
+              {!isTodayEditActive && newTodayItemMode ? (
                 <View style={styles.todayItemCell}>
                   <TodayFoodRow>
                     <View style={styles.todayCheckbox} />
@@ -413,7 +433,7 @@ export const ListsScreen = ({ navigation }: any) => {
                     </View>
                   </TodayFoodRow>
                 </View>
-              ) : !isTodayEditing ? (
+              ) : !isTodayEditActive ? (
                 <TodayFoodRow onPress={() => setNewTodayItemMode(true)}>
                   <View style={styles.todayCheckboxSlot}>
                     <Plus size={20} color={Colors.textHeading} strokeWidth={2} />
