@@ -70,13 +70,19 @@ export default function App() {
             borderTopWidth: 0,
             elevation: 0,
             shadowOpacity: 0,
-            height: 50,
+            height: 45,
+          },
+          tabBarItemStyle: {
             paddingTop: 0,
+            justifyContent: 'flex-start',
+          },
+          tabBarIconStyle: {
+            marginTop: 0,
           },
           tabBarLabelStyle: {
             fontFamily: 'Inter_600SemiBold', // Matches the small bold label
             fontSize: 10,
-            marginTop: 4,
+            marginTop: -2, // Pull label up too
           }
         }}
       >
