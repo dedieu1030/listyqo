@@ -1,19 +1,27 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Dimensions, Animated, Pressable, Platform } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  TextInput,
+  Dimensions,
+  Animated,
+  Platform,
+  Pressable,
+  Keyboard,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../theme/colors';
 import { useStore } from '../store';
-import { User, ChevronUp, CheckCircle, Plus, Trash2, LayoutGrid, LayoutList, Check } from 'lucide-react-native';
+import { User, ChevronUp, CheckCircle, Plus, Check, LayoutGrid, LayoutList } from 'lucide-react-native';
 import Svg, { Path, Circle } from 'react-native-svg';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = width * 0.72;
 const SPACING = 16;
 const FULL_SIZE = CARD_WIDTH + SPACING;
-
-const TODAY_ROW_MIN = 52;
-const CHECKBOX_SIZE = 22;
-const SEPARATOR = Platform.OS === 'ios' ? StyleSheet.hairlineWidth : 1;
 
 // A decorative element mimicking the daisy from the reference image
 const MockDaisy = ({ size = 40, color = "#FFFFFF" }) => (
@@ -38,7 +46,7 @@ const MockDaisy = ({ size = 40, color = "#FFFFFF" }) => (
 export const ListsScreen = ({ navigation }: any) => {
   const { 
     lists, addList, 
-    todayItems, addTodayItem, toggleTodayItem, deleteTodayItem 
+    todayItems, addTodayItem, toggleTodayItem 
   } = useStore();
   const [activeTab, setActiveTab] = useState<'today' | 'week'>('week');
   const [viewMode, setViewMode] = useState<'list' | 'carousel'>('carousel');
@@ -46,8 +54,8 @@ export const ListsScreen = ({ navigation }: any) => {
   const [newListMode, setNewListMode] = useState(false);
   const [newListName, setNewListName] = useState('');
 
-  const [newTodayItemMode, setNewTodayItemMode] = useState(false);
-  const [newTodayItemName, setNewTodayItemName] = useState('');
+  const [todayDraft, setTodayDraft] = useState('');
+  const todayAddInputRef = useRef<React.ComponentRef<typeof TextInput>>(null);
 
   const scrollX = useRef(new Animated.Value(0)).current;
 
@@ -60,12 +68,23 @@ export const ListsScreen = ({ navigation }: any) => {
   };
 
   const handleAddTodayItem = () => {
-    if (newTodayItemName.trim().length > 0) {
-      addTodayItem(newTodayItemName.trim());
-      setNewTodayItemName('');
-      setNewTodayItemMode(false);
-    }
+    const name = todayDraft.trim();
+    if (name.length === 0) return;
+    addTodayItem(name);
+    setTodayDraft('');
+    Keyboard.dismiss();
   };
+
+  const locale = Intl.DateTimeFormat().resolvedOptions().locale;
+  const now = new Date();
+  const weekdayRaw = now.toLocaleDateString(locale, { weekday: 'long' });
+  const todayWeekday =
+    weekdayRaw.charAt(0).toLocaleUpperCase(locale) + weekdayRaw.slice(1);
+  const todayFullDate = now.toLocaleDateString(locale, {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
 
   const cardColors = ['#A5E3C1', '#36C185', '#57C693', '#F2AE72', '#EED8A1'];
 
@@ -164,7 +183,12 @@ export const ListsScreen = ({ navigation }: any) => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+      >
         
         {/* Header Area */}
         <View style={styles.headerArea}>
@@ -344,74 +368,76 @@ export const ListsScreen = ({ navigation }: any) => {
 
         {activeTab === 'today' && (
           <View style={styles.contentSection}>
-            <View style={styles.todayFoodList}>
+            <View style={styles.todayDateHeader}>
+              <Text style={styles.todayWeekday}>{todayWeekday}</Text>
+              <Text style={styles.todayFullDate}>{todayFullDate}</Text>
+            </View>
+
+            <View style={styles.todayListBlock}>
               {todayItems.map((item) => (
-                <View key={item.id} style={styles.todayRow}>
-                  <Pressable
-                    style={styles.todayRowMain}
-                    onPress={() => toggleTodayItem(item.id)}
-                    android_ripple={{ color: 'rgba(0,0,0,0.06)' }}
-                  >
-                    <View style={styles.todayCheckboxSlot}>
-                      <View
-                        style={[
-                          styles.todayCheckboxBox,
-                          item.checked && styles.todayCheckboxBoxChecked,
-                        ]}
-                      >
-                        {item.checked ? (
-                          <Check size={14} color="#FFFFFF" strokeWidth={3} />
-                        ) : null}
-                      </View>
-                    </View>
-                    <Text
-                      style={[styles.todayItemLabel, item.checked && styles.todayItemLabelDone]}
-                      numberOfLines={2}
+                <View key={item.id} style={styles.todayItemOuter}>
+                  <View style={styles.todayItemInner}>
+                    <TouchableOpacity
+                      onPress={() => toggleTodayItem(item.id)}
+                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                      style={styles.todayCheckboxCell}
+                      accessibilityRole="checkbox"
+                      accessibilityState={{ checked: item.checked }}
                     >
-                      {item.name}
-                    </Text>
-                  </Pressable>
-                  <TouchableOpacity
-                    style={styles.todayDeleteBtn}
-                    onPress={() => deleteTodayItem(item.id)}
-                    hitSlop={{ top: 12, bottom: 12, left: 8, right: 8 }}
-                    accessibilityLabel="Delete item"
-                  >
-                    <Trash2 size={18} color="#FF3B30" />
-                  </TouchableOpacity>
+                      {item.checked ? (
+                        <View style={[styles.todayCheckboxBox, styles.todayCheckboxBoxOn]}>
+                          <Check size={14} color={Colors.textHeading} strokeWidth={2.5} />
+                        </View>
+                      ) : (
+                        <View style={styles.todayCheckboxBox} />
+                      )}
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.todayItemLabelWrap}
+                      onPress={() => toggleTodayItem(item.id)}
+                      activeOpacity={0.7}
+                    >
+                      <Text
+                        style={[styles.todayItemLabel, item.checked && styles.todayItemLabelChecked]}
+                        numberOfLines={3}
+                      >
+                        {item.name}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
               ))}
 
-              {newTodayItemMode ? (
-                <View style={[styles.todayRow, styles.todayAddRow]}>
-                  <View style={styles.todayCheckboxSlot} />
+              <View style={styles.todayItemOuter}>
+                <View style={[styles.todayItemInner, styles.todayComposerInner]}>
+                  <Pressable
+                    accessibilityLabel="Focus add item field"
+                    onPress={() => todayAddInputRef.current?.focus()}
+                    style={({ pressed }) => [
+                      styles.todayCheckboxCell,
+                      styles.todayComposerLeading,
+                      pressed && styles.todayComposerPlusPressed,
+                    ]}
+                  >
+                    <Plus size={20} color={Colors.textHeading} strokeWidth={2.5} />
+                  </Pressable>
                   <TextInput
+                    ref={todayAddInputRef}
                     style={styles.todayAddInput}
-                    value={newTodayItemName}
-                    onChangeText={setNewTodayItemName}
-                    placeholder="New item"
+                    value={todayDraft}
+                    onChangeText={setTodayDraft}
+                    placeholder="Add item..."
                     placeholderTextColor={Colors.textLight}
-                    onSubmitEditing={handleAddTodayItem}
                     returnKeyType="done"
                     blurOnSubmit={false}
-                    autoFocus
+                    onSubmitEditing={handleAddTodayItem}
+                    multiline={false}
+                    autoCorrect
+                    autoCapitalize="sentences"
+                    underlineColorAndroid="transparent"
                   />
-                  <TouchableOpacity onPress={() => { setNewTodayItemName(''); setNewTodayItemMode(false); }}>
-                    <Text style={styles.todayAddCancel}>Cancel</Text>
-                  </TouchableOpacity>
                 </View>
-              ) : (
-                <Pressable
-                  style={({ pressed }) => [styles.todayRow, pressed && styles.todayRowPressed]}
-                  onPress={() => setNewTodayItemMode(true)}
-                  android_ripple={{ color: 'rgba(0,0,0,0.06)' }}
-                >
-                  <View style={styles.todayCheckboxSlot}>
-                    <Plus size={22} color={Colors.textHeading} strokeWidth={2.5} />
-                  </View>
-                  <Text style={styles.todayAddHint}>Add item</Text>
-                </Pressable>
-              )}
+              </View>
             </View>
           </View>
         )}
@@ -437,96 +463,108 @@ const styles = StyleSheet.create({
   contentSection: { flex: 1 },
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 24, paddingVertical: 24 },
   sectionTitle: { fontFamily: 'Inter_800ExtraBold', fontSize: 26, lineHeight: 32, color: '#111' },
-  todayFoodList: {
-    marginHorizontal: 24,
-    borderTopWidth: SEPARATOR,
-    borderTopColor: Colors.listDivider,
-    backgroundColor: Colors.background,
+  todayDateHeader: {
+    paddingHorizontal: 24,
+    paddingTop: 8,
+    paddingBottom: 20,
+    alignItems: 'flex-start',
   },
-  todayRow: {
+  todayWeekday: {
+    fontFamily: 'Lora_700Bold',
+    fontSize: 28,
+    lineHeight: 34,
+    color: Colors.textHeading,
+  },
+  todayFullDate: {
+    fontFamily: 'Inter_500Medium',
+    fontSize: 15,
+    lineHeight: 22,
+    color: Colors.textLight,
+    marginTop: 6,
+  },
+
+  todayListBlock: {
+    paddingBottom: 24,
+  },
+  todayItemOuter: {
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: Colors.border,
+  },
+  todayItemInner: {
     flexDirection: 'row',
     alignItems: 'center',
-    minHeight: TODAY_ROW_MIN,
-    borderBottomWidth: SEPARATOR,
-    borderBottomColor: Colors.listDivider,
-    backgroundColor: Colors.background,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    minHeight: 52,
   },
-  todayRowPressed: {
-    backgroundColor: 'rgba(0,0,0,0.03)',
+  todayComposerInner: {
+    alignItems: 'stretch',
+    paddingVertical: 0,
+    paddingTop: 0,
+    paddingBottom: 0,
   },
-  todayRowMain: {
-    flex: 1,
-    flexDirection: 'row',
+  todayComposerPlusPressed: {
+    opacity: 0.5,
+  },
+  todayCheckboxCell: {
+    width: 32,
     alignItems: 'center',
-    minHeight: TODAY_ROW_MIN,
-    paddingLeft: 0,
-  },
-  todayCheckboxSlot: {
-    width: 40,
-    minHeight: TODAY_ROW_MIN,
     justifyContent: 'center',
-    alignItems: 'center',
+  },
+  todayComposerLeading: {
+    minHeight: 52,
+    justifyContent: 'center',
+    alignSelf: 'stretch',
   },
   todayCheckboxBox: {
-    width: CHECKBOX_SIZE,
-    height: CHECKBOX_SIZE,
-    borderRadius: 5,
-    borderWidth: 2,
-    borderColor: '#C7C7CC',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Colors.background,
+    width: 22,
+    height: 22,
+    borderRadius: 4,
+    borderWidth: 1.5,
+    borderColor: '#C8C8C8',
+    backgroundColor: Colors.white,
   },
-  todayCheckboxBoxChecked: {
-    backgroundColor: Colors.black,
-    borderColor: Colors.black,
+  todayCheckboxBoxOn: {
+    borderColor: Colors.textHeading,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  todayItemLabelWrap: {
+    flex: 1,
+    paddingLeft: 4,
+    justifyContent: 'center',
   },
   todayItemLabel: {
-    flex: 1,
     fontFamily: 'Inter_400Regular',
-    fontSize: 17,
+    fontSize: 16,
     lineHeight: 22,
     color: Colors.textHeading,
-    paddingVertical: 14,
-    paddingRight: 8,
   },
-  todayItemLabelDone: {
-    color: Colors.textLight,
+  todayItemLabelChecked: {
     textDecorationLine: 'line-through',
-  },
-  todayDeleteBtn: {
-    width: 44,
-    minHeight: TODAY_ROW_MIN,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  todayAddRow: {
-    paddingRight: 12,
+    color: Colors.textLight,
   },
   todayAddInput: {
     flex: 1,
+    alignSelf: 'stretch',
+    minHeight: 52,
+    paddingTop: Platform.OS === 'ios' ? 14 : 10,
+    paddingBottom: Platform.OS === 'ios' ? 14 : 10,
+    paddingLeft: 8,
+    paddingRight: 8,
+    margin: 0,
     fontFamily: 'Inter_400Regular',
-    fontSize: 17,
-    lineHeight: 22,
+    fontSize: 16,
     color: Colors.textHeading,
-    paddingVertical: 12,
-    marginRight: 8,
-    minHeight: 44,
+    ...Platform.select({
+      ios: { lineHeight: 20 },
+      android: {
+        textAlignVertical: 'center',
+        includeFontPadding: false,
+      },
+    }),
   },
-  todayAddCancel: {
-    fontFamily: 'Inter_600SemiBold',
-    fontSize: 15,
-    color: '#FF3B30',
-  },
-  todayAddHint: {
-    flex: 1,
-    fontFamily: 'Inter_400Regular',
-    fontSize: 17,
-    lineHeight: 22,
-    color: Colors.textLight,
-    paddingVertical: 14,
-  },
-  
+
   // Carousel Specific
   carouselPhysicalCard: {
     borderRadius: 36,
@@ -570,17 +608,13 @@ const styles = StyleSheet.create({
   listItemRow: { width: '100%', paddingVertical: 12 },
   listItemRowFocused: { backgroundColor: '#F5F4EE' },
   rowContent: { flexDirection: 'row', paddingHorizontal: 24 },
-  rowContentCompact: { flexDirection: 'row', paddingHorizontal: 24, alignItems: 'center' },
   colorSquare: { width: 140, height: 130, borderRadius: 20, padding: 16, justifyContent: 'space-between', position: 'relative', overflow: 'hidden' },
-  colorSquareSmall: { width: 80, height: 80, borderRadius: 16, justifyContent: 'center', alignItems: 'center', position: 'relative', overflow: 'hidden' },
   decorativeWrapper: { position: 'absolute' },
   squareTitle: { fontFamily: 'Inter_800ExtraBold', fontSize: 17, color: '#000', lineHeight: 22 },
   squareBottom: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' },
   squareSubtitle: { fontFamily: 'Inter_500Medium', fontSize: 14, color: '#000' },
   listDetails: { flex: 1, marginLeft: 20, justifyContent: 'space-between', paddingVertical: 4 },
-  listDetailsCompact: { flex: 1, marginLeft: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   listDesc: { fontFamily: 'Inter_400Regular', fontSize: 15, color: '#666', lineHeight: 20, paddingRight: 10 },
-  itemText: { fontFamily: 'Inter_700Bold', fontSize: 18, color: '#111' },
   btnPrimary: { backgroundColor: '#111', alignSelf: 'flex-start', paddingHorizontal: 24, paddingVertical: 12, borderRadius: 30 },
   btnPrimaryText: { fontFamily: 'Inter_700Bold', color: '#FFF', fontSize: 15 },
   btnPlain: { alignSelf: 'flex-end', paddingVertical: 12 },
