@@ -225,35 +225,40 @@ export const ListsScreen = ({ navigation }: any) => {
                     decelerationRate="fast"
                     onScroll={Animated.event(
                       [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-                      { useNativeDriver: true }
+                      { useNativeDriver: false } // Required false for animating width
                     )}
                     renderItem={({ item, index }) => renderCarouselItem(item, index)}
                   />
                   <View style={styles.carouselFooter}>
                     <View style={styles.paginationRow}>
-                      {lists.map((_, i) => (
-                         <View key={i} style={[styles.dot, { opacity: 0.2 }]} />
-                      ))}
-                      
-                      {lists.length > 0 && (
-                        <Animated.View 
-                          style={[
-                            styles.dot, 
-                            { 
-                              position: 'absolute', 
-                              left: 8, // matches the left margin of the first static dot
-                              opacity: 0.8,
-                              transform: [{
-                                translateX: scrollX.interpolate({
-                                  inputRange: lists.map((_, i) => i * (width * 0.75)),
-                                  outputRange: lists.map((_, i) => i * 24), // 8(width) + 8(left margin) + 8(right margin)
-                                  extrapolate: 'clamp'
-                                })
-                              }]
-                            }
-                          ]} 
-                        />
-                      )}
+                      {lists.map((_, i) => {
+                        const ITEM_WIDTH = width * 0.75;
+                        const activeFactor = scrollX.interpolate({
+                          inputRange: [(i - 1) * ITEM_WIDTH, i * ITEM_WIDTH, (i + 1) * ITEM_WIDTH],
+                          outputRange: [0, 1, 0],
+                          extrapolate: 'clamp'
+                        });
+                        
+                        const dotWidth = activeFactor.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [8, 24] // Clean pill expansion (no distortion)
+                        });
+                        
+                        const dotOpacity = activeFactor.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [0.2, 0.9]
+                        });
+
+                        return (
+                          <Animated.View 
+                            key={i} 
+                            style={[
+                              styles.dot, 
+                              { width: dotWidth, opacity: dotOpacity }
+                            ]} 
+                          />
+                        );
+                      })}
                     </View>
                     <Text style={styles.swipeText}>Swipe To Next List</Text>
                   </View>
