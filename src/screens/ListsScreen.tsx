@@ -26,6 +26,8 @@ const TODAY_DELETE_CONTENT_SHIFT = TODAY_LINE_H + TODAY_CHECKBOX_GAP;
 /** Ouverture / fermeture : même durée et easing pour une fermeture aussi fluide que l’ouverture. */
 const TODAY_ANIM_MS = 280;
 const TODAY_ANIM_EASING = Easing.inOut(Easing.cubic);
+/** Espace réservé à droite pour la poignée drag (même ordre de grandeur que la colonne −). */
+const TODAY_DRAG_EXTRA_PAD = TODAY_LINE_H + 8;
 
 /** Même barre pour item saisi / item affiché : évite le saut au passage TextInput → Text. */
 function TodayFoodRow({
@@ -300,35 +302,8 @@ export const ListsScreen = ({ navigation }: any) => {
                     <View style={styles.todayItemRowHost}>
                       <Animated.View
                         style={[
-                          styles.todayDeleteSlot,
-                          {
-                            opacity: todayDeleteAnim,
-                            transform: [
-                              {
-                                translateX: todayDeleteAnim.interpolate({
-                                  inputRange: [0, 1],
-                                  outputRange: [-TODAY_DELETE_CONTENT_SHIFT, 0],
-                                }),
-                              },
-                            ],
-                          },
-                        ]}
-                        pointerEvents={isTodayEditActive ? 'auto' : 'none'}
-                      >
-                        <TouchableOpacity
-                          onPress={() => deleteTodayItem(item.id)}
-                          hitSlop={{ top: 10, bottom: 10, left: 8, right: 8 }}
-                          accessibilityLabel="Delete item"
-                          accessibilityRole="button"
-                        >
-                          <View style={styles.todayDeleteCircle}>
-                            <Minus size={12} color="#FFFFFF" strokeWidth={3} />
-                          </View>
-                        </TouchableOpacity>
-                      </Animated.View>
-                      <Animated.View
-                        style={[
                           styles.todayItemRow,
+                          styles.todayItemRowEditPad,
                           {
                             transform: [
                               {
@@ -374,6 +349,61 @@ export const ListsScreen = ({ navigation }: any) => {
                             selectionColor={Colors.primary}
                             returnKeyType="done"
                           />
+                        </View>
+                      </Animated.View>
+                      <Animated.View
+                        style={[
+                          styles.todayDeleteSlot,
+                          {
+                            opacity: todayDeleteAnim,
+                            transform: [
+                              {
+                                translateX: todayDeleteAnim.interpolate({
+                                  inputRange: [0, 1],
+                                  outputRange: [-TODAY_DELETE_CONTENT_SHIFT, 0],
+                                }),
+                              },
+                            ],
+                          },
+                        ]}
+                        pointerEvents={isTodayEditActive ? 'auto' : 'none'}
+                      >
+                        <TouchableOpacity
+                          onPress={() => deleteTodayItem(item.id)}
+                          hitSlop={{ top: 10, bottom: 10, left: 8, right: 8 }}
+                          accessibilityLabel="Delete item"
+                          accessibilityRole="button"
+                        >
+                          <View style={styles.todayDeleteCircle}>
+                            <Minus size={12} color="#FFFFFF" strokeWidth={3} />
+                          </View>
+                        </TouchableOpacity>
+                      </Animated.View>
+                      <Animated.View
+                        style={[
+                          styles.todayDragSlot,
+                          {
+                            opacity: todayDeleteAnim,
+                            transform: [
+                              {
+                                translateX: todayDeleteAnim.interpolate({
+                                  inputRange: [0, 1],
+                                  outputRange: [TODAY_DELETE_CONTENT_SHIFT, 0],
+                                }),
+                              },
+                            ],
+                          },
+                        ]}
+                        pointerEvents={isTodayEditActive ? 'box-none' : 'none'}
+                      >
+                        <View
+                          style={styles.todayDragGrip}
+                          accessibilityRole="button"
+                          accessibilityLabel="Reorder"
+                        >
+                          <View style={styles.todayDragLine} />
+                          <View style={styles.todayDragLine} />
+                          <View style={styles.todayDragLine} />
                         </View>
                       </Animated.View>
                     </View>
@@ -508,6 +538,33 @@ const styles = StyleSheet.create({
     backgroundColor: '#FF3B30',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  /** À droite de la ligne, même logique d’anim que le − (entre depuis le bord droit). */
+  todayDragSlot: {
+    position: 'absolute',
+    right: SCREEN_EDGE,
+    top: 0,
+    bottom: 0,
+    width: TODAY_LINE_H,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 2,
+  },
+  todayDragGrip: {
+    width: TODAY_LINE_H,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 3,
+  },
+  todayDragLine: {
+    width: 14,
+    height: 2,
+    borderRadius: 1,
+    backgroundColor: '#C8C8C8',
+  },
+  /** Évite que le texte passe sous la poignée (réserve l’aire à droite). */
+  todayItemRowEditPad: {
+    paddingRight: SCREEN_EDGE + TODAY_DRAG_EXTRA_PAD,
   },
   /** Même largeur que le contenu (padding 24) : pas d’arête à bord d’écran. */
   todayItemHairline: {
