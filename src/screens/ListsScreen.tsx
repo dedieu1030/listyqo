@@ -73,65 +73,72 @@ export const ListsScreen = ({ navigation }: any) => {
   const renderCarouselItem = (item: any, index: number) => {
     const isCompleted = index === 0;
     
-    const ITEM_SIZE = CARD_WIDTH + SPACING;
+    const ITEM_WIDTH = width * 0.75;
+    const CARD_WIDTH = ITEM_WIDTH - 24; // 12px gap on each side inside the wrapper
     
+    // Snapping physics math
     const inputRange = [
-      (index - 1) * ITEM_SIZE,
-      index * ITEM_SIZE,
-      (index + 1) * ITEM_SIZE,
+      (index - 1) * ITEM_WIDTH,
+      index * ITEM_WIDTH,
+      (index + 1) * ITEM_WIDTH,
     ];
 
     const scale = scrollX.interpolate({
       inputRange,
-      outputRange: [0.88, 1, 0.88],
+      outputRange: [0.85, 1, 0.85],
       extrapolate: 'clamp',
     });
 
     const rotateY = scrollX.interpolate({
       inputRange,
-      outputRange: ['12deg', '0deg', '-12deg'],
+      outputRange: ['15deg', '0deg', '-15deg'],
       extrapolate: 'clamp',
     });
 
     return (
-      <Animated.View style={[
-        styles.carouselItemContainer, 
-        { 
-          transform: [
-            { scale }, 
-            { perspective: 1000 }, 
-            { rotateY }
-          ]
-        }
-      ]}>
-        <View style={styles.carouselPhysicalCard}>
+      <View style={{ width: ITEM_WIDTH, justifyContent: 'center', alignItems: 'center' }}>
+        <Animated.View style={[
+          styles.carouselPhysicalCard, 
+          { 
+            width: CARD_WIDTH,
+            backgroundColor: cardColors[index % cardColors.length], // The entire card takes the color
+            transform: [
+              { perspective: 1000 }, 
+              { scale }, 
+              { rotateY }
+            ]
+          }
+        ]}>
           <TouchableOpacity 
-            activeOpacity={0.8}
+            activeOpacity={0.9}
+            style={styles.carouselCardInner}
             onPress={() => navigation.navigate('ListDetails', { listId: item.id, listName: item.name })}
-            style={[styles.carouselCardHeader, { backgroundColor: cardColors[index % cardColors.length] }]}
           >
-            {/* IMAGE TOP Structure */}
+            {/* Top: Image/Daisy */}
             <View style={styles.carouselImageTop}>
-               <MockDaisy size={60} />
+               <MockDaisy size={65} />
             </View>
-            <View style={styles.carouselHeaderBottom}>
-              <Text style={styles.carouselLessonText}>Lesson {index + 1}</Text>
-              {isCompleted && <CheckCircle size={20} color="#111" strokeWidth={2.5} />}
+            
+            {/* Bottom: Info & Action */}
+            <View style={styles.carouselBody}>
+              <View>
+                <Text style={styles.carouselListTitle} numberOfLines={1}>{item.name}</Text>
+                <View style={styles.carouselMeta}>
+                  <Text style={styles.carouselLessonText}>Lesson {index + 1}</Text>
+                  {isCompleted && <CheckCircle size={20} color="#111" strokeWidth={2.5} />}
+                </View>
+                <Text style={styles.carouselDesc} numberOfLines={2}>Learn how to manage this list.</Text>
+              </View>
+
+              <View style={styles.carouselActionRow}>
+                <View style={styles.btnPrimaryCarousel}>
+                  <Text style={styles.btnPrimaryText}>Start now</Text>
+                </View>
+              </View>
             </View>
           </TouchableOpacity>
-          
-          <View style={styles.carouselBody}>
-              <Text style={styles.carouselListTitle} numberOfLines={1}>{item.name}</Text>
-              <Text style={styles.carouselDesc} numberOfLines={2}>Learn to say which languages you speak and manage your inventory.</Text>
-              <TouchableOpacity 
-                style={styles.btnPrimaryCarousel}
-                onPress={() => navigation.navigate('ListDetails', { listId: item.id, listName: item.name })}
-              >
-                <Text style={styles.btnPrimaryText}>Start now</Text>
-              </TouchableOpacity>
-          </View>
-        </View>
-      </Animated.View>
+        </Animated.View>
+      </View>
     );
   };
 
@@ -197,9 +204,9 @@ export const ListsScreen = ({ navigation }: any) => {
                   horizontal
                   showsHorizontalScrollIndicator={false}
                   keyExtractor={(item) => item.id}
-                  contentContainerStyle={styles.carouselContainer}
-                  snapToInterval={CARD_WIDTH + SPACING}
-                  snapToAlignment="center"
+                  contentContainerStyle={{ paddingHorizontal: (width - (width * 0.75)) / 2, paddingVertical: 20 }}
+                  snapToInterval={width * 0.75}
+                  snapToAlignment="start"
                   decelerationRate="fast"
                   onScroll={Animated.event(
                     [{ nativeEvent: { contentOffset: { x: scrollX } } }],
@@ -317,42 +324,32 @@ const styles = StyleSheet.create({
   dateText: { fontFamily: 'Inter_500Medium', fontSize: 16, color: '#8A8A8A', marginTop: 4 },
   
   // Carousel Specific
-  carouselContainer: { 
-    paddingHorizontal: (width - CARD_WIDTH) / 2 - (SPACING / 2), 
-    paddingVertical: 20 
-  },
-  carouselItemContainer: { 
-    width: CARD_WIDTH, 
-    marginHorizontal: SPACING / 2, 
-  },
   carouselPhysicalCard: {
-    backgroundColor: '#F5F4EE', 
-    borderRadius: 32,
-    padding: 16,
-    height: 400,
+    borderRadius: 36,
+    padding: 24,
+    height: 440,
     justifyContent: 'space-between'
   },
-  carouselCardHeader: { 
-    height: 180, 
-    borderRadius: 20, 
-    padding: 16, 
-    justifyContent: 'space-between', 
-    overflow: 'hidden' 
-  },
-  carouselHeaderBottom: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' },
-  carouselBody: {
+  carouselCardInner: {
     flex: 1,
-    paddingTop: 16,
-    justifyContent: 'space-between'
+    justifyContent: 'space-between',
   },
-  carouselImageTop: { height: 100, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 20 },
-  carouselInfoBottom: { },
-  carouselListTitle: { fontFamily: 'Inter_800ExtraBold', fontSize: 24, color: '#111', marginBottom: 4 },
+  carouselImageTop: { 
+    height: 120, 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    backgroundColor: 'rgba(255,255,255,0.15)', 
+    borderRadius: 24 
+  },
+  carouselBody: {
+    paddingTop: 16,
+  },
+  carouselListTitle: { fontFamily: 'Inter_800ExtraBold', fontSize: 26, color: '#111', marginBottom: 4 },
   carouselMeta: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   carouselLessonText: { fontFamily: 'Inter_600SemiBold', fontSize: 16, color: '#111' },
-  carouselDetails: { marginTop: 24 },
-  carouselDesc: { fontFamily: 'Inter_500Medium', fontSize: 16, color: '#666', lineHeight: 22, paddingBottom: 10 },
-  btnPrimaryCarousel: { backgroundColor: '#111', paddingVertical: 14, borderRadius: 30, alignItems: 'center' },
+  carouselDesc: { fontFamily: 'Inter_500Medium', fontSize: 16, color: '#444', lineHeight: 22, marginTop: 12, marginBottom: 24 },
+  carouselActionRow: { alignItems: 'center' },
+  btnPrimaryCarousel: { backgroundColor: '#111', paddingVertical: 16, paddingHorizontal: 40, borderRadius: 30, alignItems: 'center' },
 
   // Original List Styles
   listItemRow: { width: '100%', paddingVertical: 12 },
