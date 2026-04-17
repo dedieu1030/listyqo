@@ -213,21 +213,47 @@ export const ListsScreen = ({ navigation }: any) => {
               </View>
             ) : (
               viewMode === 'carousel' ? (
-                <Animated.FlatList
-                  data={lists}
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  keyExtractor={(item) => item.id}
-                  contentContainerStyle={{ paddingHorizontal: (width - (width * 0.75)) / 2, paddingTop: 20, paddingBottom: 100 }}
-                  snapToInterval={width * 0.75}
-                  snapToAlignment="start"
-                  decelerationRate="fast"
-                  onScroll={Animated.event(
-                    [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-                    { useNativeDriver: true }
-                  )}
-                  renderItem={({ item, index }) => renderCarouselItem(item, index)}
-                />
+                <View>
+                  <Animated.FlatList
+                    data={lists}
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    keyExtractor={(item) => item.id}
+                    contentContainerStyle={{ paddingHorizontal: (width - (width * 0.75)) / 2, paddingTop: 20, paddingBottom: 20 }}
+                    snapToInterval={width * 0.75}
+                    snapToAlignment="start"
+                    decelerationRate="fast"
+                    onScroll={Animated.event(
+                      [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+                      { useNativeDriver: true }
+                    )}
+                    renderItem={({ item, index }) => renderCarouselItem(item, index)}
+                  />
+                  <View style={styles.carouselFooter}>
+                    <View style={styles.paginationRow}>
+                      {lists.map((_, i) => {
+                        const ITEM_WIDTH = width * 0.75;
+                        const scaleX = scrollX.interpolate({
+                          inputRange: [(i - 1) * ITEM_WIDTH, i * ITEM_WIDTH, (i + 1) * ITEM_WIDTH],
+                          outputRange: [1, 2.5, 1],
+                          extrapolate: 'clamp'
+                        });
+                        const dotOpacity = scrollX.interpolate({
+                          inputRange: [(i - 1) * ITEM_WIDTH, i * ITEM_WIDTH, (i + 1) * ITEM_WIDTH],
+                          outputRange: [0.2, 0.8, 0.2],
+                          extrapolate: 'clamp'
+                        });
+                        return (
+                          <Animated.View 
+                            key={i} 
+                            style={[styles.dot, { opacity: dotOpacity, transform: [{ scaleX }] }]} 
+                          />
+                        );
+                      })}
+                    </View>
+                    <Text style={styles.swipeText}>Swipe To Next List</Text>
+                  </View>
+                </View>
               ) : (
                 lists.map((list, index) => {
                   const isFocused = index === 1;
@@ -364,6 +390,10 @@ const styles = StyleSheet.create({
   carouselDesc: { fontFamily: 'Inter_500Medium', fontSize: 16, color: '#444', lineHeight: 22, marginTop: 12, marginBottom: 24 },
   carouselActionRow: { alignItems: 'center' },
   btnPrimaryCarousel: { backgroundColor: '#111', paddingVertical: 16, paddingHorizontal: 40, borderRadius: 30, alignItems: 'center' },
+  carouselFooter: { alignItems: 'center', paddingBottom: 40, marginTop: 10 },
+  paginationRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 20 },
+  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#111', marginHorizontal: 8 },
+  swipeText: { fontFamily: 'Inter_600SemiBold', fontSize: 13, color: '#8A8A8A' },
 
   // Original List Styles
   listItemRow: { width: '100%', paddingVertical: 12 },
