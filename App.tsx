@@ -68,9 +68,7 @@ export default function App() {
             borderTopWidth: 0, // Removes the divider completely
             elevation: 0,      // No android shadow
             shadowOpacity: 0,  // No iOS shadow
-            height: 85,
-            paddingBottom: 30,
-            paddingTop: 10,
+            paddingTop: 8,
           },
           tabBarLabelStyle: {
             fontFamily: 'Inter_600SemiBold', // Matches the small bold label
