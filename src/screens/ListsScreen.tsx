@@ -343,14 +343,14 @@ const styles = StyleSheet.create({
     width: CARD_WIDTH, 
     marginRight: SPACING, 
     position: 'relative',
-    paddingBottom: 60, // Ensure space for the floating background at the bottom
+    paddingBottom: 20, 
   },
   carouselFocusBackground: {
     position: 'absolute',
     top: -20, 
     left: -20,
     right: -20,
-    bottom: 0, 
+    bottom: -10, 
     backgroundColor: '#F5F4EE', 
     borderRadius: 40,
     zIndex: -1,
