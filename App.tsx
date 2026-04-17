@@ -65,10 +65,12 @@ export default function App() {
           sceneStyle: { backgroundColor: Colors.background },
           tabBarStyle: {
             backgroundColor: Colors.tabBarBackground,
-            borderTopWidth: 0, // Removes the divider completely
-            elevation: 0,      // No android shadow
-            shadowOpacity: 0,  // No iOS shadow
-            paddingTop: 8,
+            borderTopWidth: 0,
+            elevation: 0,
+            shadowOpacity: 0,
+            height: 90,
+            paddingTop: 12,
+            paddingBottom: 28,
           },
           tabBarLabelStyle: {
             fontFamily: 'Inter_600SemiBold', // Matches the small bold label
