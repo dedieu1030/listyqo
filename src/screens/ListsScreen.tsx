@@ -23,6 +23,9 @@ const TODAY_LINE_H = 22;
 const TODAY_CHECKBOX_GAP = 14;
 /** Décalage du bloc case + texte = place laissée au − à la place de la case (22 + 14). */
 const TODAY_DELETE_CONTENT_SHIFT = TODAY_LINE_H + TODAY_CHECKBOX_GAP;
+/** Ouverture / fermeture : même durée et easing pour une fermeture aussi fluide que l’ouverture. */
+const TODAY_ANIM_MS = 280;
+const TODAY_ANIM_EASING = Easing.inOut(Easing.cubic);
 
 /** Même barre pour item saisi / item affiché : évite le saut au passage TextInput → Text. */
 function TodayFoodRow({
@@ -93,24 +96,15 @@ export const ListsScreen = ({ navigation }: any) => {
   }, [activeTab]);
 
   useEffect(() => {
+    if (!isTodayEditing) return;
+
     todayDeleteAnim.stopAnimation();
-
-    if (!isTodayEditing) {
-      Animated.timing(todayDeleteAnim, {
-        toValue: 0,
-        duration: 240,
-        easing: Easing.in(Easing.cubic),
-        useNativeDriver: true,
-      }).start();
-      return;
-    }
-
     todayDeleteAnim.setValue(0);
     const frame = requestAnimationFrame(() => {
       Animated.timing(todayDeleteAnim, {
         toValue: 1,
-        duration: 280,
-        easing: Easing.out(Easing.cubic),
+        duration: TODAY_ANIM_MS,
+        easing: TODAY_ANIM_EASING,
         useNativeDriver: true,
       }).start();
     });
@@ -141,10 +135,20 @@ export const ListsScreen = ({ navigation }: any) => {
 
   const handleTodayEditPress = () => {
     if (isTodayEditing) {
-      todayItems.forEach((item) => {
-        if (!item.name.trim()) deleteTodayItem(item.id);
+      todayDeleteAnim.stopAnimation();
+      Animated.timing(todayDeleteAnim, {
+        toValue: 0,
+        duration: TODAY_ANIM_MS,
+        easing: TODAY_ANIM_EASING,
+        useNativeDriver: true,
+      }).start(({ finished }) => {
+        if (!finished) return;
+        const { todayItems: items, deleteTodayItem: del } = useStore.getState();
+        items.forEach((item) => {
+          if (!item.name.trim()) del(item.id);
+        });
+        setIsTodayEditing(false);
       });
-      setIsTodayEditing(false);
       return;
     }
     if (newTodayItemMode) handleAddTodayItem();
