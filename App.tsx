@@ -3,7 +3,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { Home, Glasses } from '@solar-icons/react-native/BoldDuotone';
+import { Home, Notebook, Glasses } from '@solar-icons/react-native/BoldDuotone';
 import { StatusBar } from 'expo-status-bar';
 
 import { 
@@ -18,7 +18,7 @@ import { Lora_400Regular, Lora_500Medium, Lora_600SemiBold, Lora_700Bold } from 
 
 import { Colors } from './src/theme/colors';
 import { 
-  ListsScreen, ListDetailsScreen, AddItemScreen, ItemDetailsScreen, 
+  ListsScreen, PlanScreen, ListDetailsScreen, AddItemScreen, ItemDetailsScreen, 
   ProfileScreen, SettingsScreen 
 } from './src/screens';
 
@@ -93,6 +93,14 @@ export default function App() {
           options={{
             tabBarIcon: ({ color }) => <Home color={color} size={24} />,
             tabBarLabel: 'Home' 
+          }} 
+        />
+        <Tab.Screen 
+          name="PlanTab" 
+          component={PlanScreen} 
+          options={{
+            tabBarIcon: ({ color }) => <Notebook color={color} size={24} />,
+            tabBarLabel: 'Plan' 
           }} 
         />
         <Tab.Screen 
