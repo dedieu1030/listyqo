@@ -3,7 +3,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { House, Profile } from 'iconsax-react-native';
+import { Home, Glasses } from '@solar-icons/react-native/BoldDuotone';
 import { StatusBar } from 'expo-status-bar';
 
 import { 
@@ -91,7 +91,7 @@ export default function App() {
           name="ListsTab" 
           component={ListsStack} 
           options={{
-            tabBarIcon: ({ color }) => <House color={color} size={24} variant="Bold" />,
+            tabBarIcon: ({ color }) => <Home color={color} size={24} />,
             tabBarLabel: 'Home' 
           }} 
         />
@@ -99,7 +99,7 @@ export default function App() {
           name="ProfileTab" 
           component={ProfileStack} 
           options={{
-            tabBarIcon: ({ color }) => <Profile color={color} size={24} variant="Bold" />,
+            tabBarIcon: ({ color }) => <Glasses color={color} size={24} />,
             tabBarLabel: 'Explore'
           }} 
         />

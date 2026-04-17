@@ -11,12 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../theme/colors';
 import { useStore } from '../store';
-import {
-  Profile,
-  ArrowUp2,
-  TickCircle,
-  AddCircle,
-} from 'iconsax-react-native';
+import { User, ChevronUp, CheckCircle, Plus, Check } from 'lucide-react-native';
 import Svg, { Path, Circle } from 'react-native-svg';
 
 /** Case à cocher et zone texte : même hauteur pour rester centrés sur l’axe vertical. */
@@ -111,7 +106,7 @@ export const ListsScreen = ({ navigation }: any) => {
         <View style={styles.headerArea}>
           <View style={styles.topHeaderRow}>
             <Text style={styles.mainTitle}>Hi, Jamie</Text>
-            <Profile size={28} color="#111" variant="Bold" />
+            <User size={28} color="#111" strokeWidth={2} />
           </View>
 
           <View style={styles.tabsContainer}>
@@ -137,7 +132,7 @@ export const ListsScreen = ({ navigation }: any) => {
           <View style={styles.contentSection}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Greet people and{"\n"}say goodbye</Text>
-              <ArrowUp2 size={24} color="#111" variant="Bold" />
+              <ChevronUp size={24} color="#111" strokeWidth={2.5} />
             </View>
 
             {lists.length === 0 ? (
@@ -161,7 +156,7 @@ export const ListsScreen = ({ navigation }: any) => {
                         {index % 2 === 1 && <MockDaisy />}
                         <View style={styles.squareBottom}>
                           <Text style={styles.squareSubtitle}>Lesson {index + 1}</Text>
-                          {isCompleted && <TickCircle size={20} color="#111" variant="Bold" />}
+                          {isCompleted && <CheckCircle size={20} color="#111" strokeWidth={2.5} />}
                         </View>
                       </TouchableOpacity>
 
@@ -195,7 +190,7 @@ export const ListsScreen = ({ navigation }: any) => {
                   </View>
                 ) : (
                   <TouchableOpacity style={styles.bottomCreateButton} onPress={() => setNewListMode(true)}>
-                    <AddCircle size={20} color="#111" variant="Bold" style={{ marginRight: 8 }} />
+                    <Plus size={20} color="#111" strokeWidth={2} style={{ marginRight: 8 }} />
                     <Text style={styles.bottomCreateButtonText}>Create new list</Text>
                   </TouchableOpacity>
                 )}
@@ -216,7 +211,7 @@ export const ListsScreen = ({ navigation }: any) => {
                       ]}
                     >
                       {item.checked ? (
-                        <TickCircle size={14} color={Colors.white} variant="Bold" />
+                        <Check size={14} color={Colors.white} strokeWidth={3} />
                       ) : null}
                     </View>
                     <View style={styles.todayItemTextWrap}>
@@ -262,7 +257,7 @@ export const ListsScreen = ({ navigation }: any) => {
               ) : (
                 <TodayFoodRow onPress={() => setNewTodayItemMode(true)}>
                   <View style={styles.todayCheckboxSlot}>
-                    <AddCircle size={20} color={Colors.textHeading} variant="Bold" />
+                    <Plus size={20} color={Colors.textHeading} strokeWidth={2} />
                   </View>
                 </TodayFoodRow>
               )}

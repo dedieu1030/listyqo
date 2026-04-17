@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView } from 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../theme/colors';
 import { useStore } from '../store';
-import { ArrowLeft2, AddCircle } from 'iconsax-react-native';
+import { ChevronLeft, Plus } from 'lucide-react-native';
 
 const POPULAR_ITEMS = ['Milk', 'Eggs', 'Bread', 'Bananas', 'Apples', 'Chicken', 'Rice', 'Pasta', 'Coffee', 'Cheese'];
 
@@ -24,7 +24,7 @@ export const AddItemScreen = ({ route, navigation }: any) => {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <ArrowLeft2 size={28} color={Colors.black} variant="Bold" />
+          <ChevronLeft size={28} color={Colors.black} strokeWidth={2} />
         </TouchableOpacity>
         <Text style={styles.title}>Add Item</Text>
         <View style={styles.headerRight} />
@@ -42,7 +42,7 @@ export const AddItemScreen = ({ route, navigation }: any) => {
           style={styles.addButton}
           onPress={() => handleAddItem(itemName)}
         >
-          <AddCircle size={20} color={Colors.white} variant="Bold" />
+          <Plus size={20} color={Colors.white} strokeWidth={2} />
         </TouchableOpacity>
       </View>
 
