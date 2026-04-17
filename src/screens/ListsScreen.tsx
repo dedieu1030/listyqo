@@ -14,7 +14,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../theme/colors';
 import { SCREEN_EDGE, tabRootTitleText } from '../theme/layout';
 import { useStore } from '../store';
-import { User, ChevronUp, CheckCircle, Plus, Check, Minus } from 'lucide-react-native';
+import {
+  User,
+  ChevronUp,
+  CheckCircle,
+  Plus,
+  Check,
+  Minus,
+  GripVertical,
+} from 'lucide-react-native';
 import Svg, { Path, Circle } from 'react-native-svg';
 
 /** Case à cocher et zone texte : même hauteur pour rester centrés sur l’axe vertical. */
@@ -401,9 +409,11 @@ export const ListsScreen = ({ navigation }: any) => {
                           accessibilityRole="button"
                           accessibilityLabel="Reorder"
                         >
-                          <View style={styles.todayDragLine} />
-                          <View style={styles.todayDragLine} />
-                          <View style={styles.todayDragLine} />
+                          <GripVertical
+                            size={18}
+                            color="#B0B0B0"
+                            strokeWidth={2}
+                          />
                         </View>
                       </Animated.View>
                     </View>
@@ -554,13 +564,6 @@ const styles = StyleSheet.create({
     width: TODAY_LINE_H,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 3,
-  },
-  todayDragLine: {
-    width: 14,
-    height: 2,
-    borderRadius: 1,
-    backgroundColor: '#C8C8C8',
   },
   /** Évite que le texte passe sous la poignée (réserve l’aire à droite). */
   todayItemRowEditPad: {
