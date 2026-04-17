@@ -408,7 +408,7 @@ const styles = StyleSheet.create({
     pointerEvents: 'none'
   },
   paginationRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
-  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#111', marginHorizontal: 8 },
+  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#111', marginHorizontal: 4 },
   swipeText: { fontFamily: 'Inter_600SemiBold', fontSize: 13, color: '#8A8A8A' },
 
   // Original List Styles
