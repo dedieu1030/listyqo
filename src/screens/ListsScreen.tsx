@@ -339,15 +339,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: (width - CARD_WIDTH) / 2, 
     paddingVertical: 20 
   },
-  carouselItemContainer: { width: CARD_WIDTH, marginRight: SPACING, position: 'relative' },
+  carouselItemContainer: { 
+    width: CARD_WIDTH, 
+    marginRight: SPACING, 
+    position: 'relative',
+    paddingBottom: 60, // Ensure space for the floating background at the bottom
+  },
   carouselFocusBackground: {
     position: 'absolute',
-    top: -15, // Provide some breathing room around the card
-    left: -15,
-    right: -15,
-    bottom: -40, // Cover the details/button as well
+    top: -20, 
+    left: -20,
+    right: -20,
+    bottom: 0, 
     backgroundColor: '#F5F4EE', 
-    borderRadius: 32,
+    borderRadius: 40,
     zIndex: -1,
   },
   carouselCard: { height: 320, borderRadius: 24, padding: 24, justifyContent: 'space-between', overflow: 'hidden' },
