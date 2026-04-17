@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, TextInput, Dimensions, Animated } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Dimensions, Animated } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../theme/colors';
 import { useStore } from '../store';
 import { User, ChevronUp, CheckCircle, Plus, Trash2, LayoutGrid, LayoutList } from 'lucide-react-native';
@@ -252,15 +253,23 @@ export const ListsScreen = ({ navigation }: any) => {
                         // In standard Animated, we map specifically the visible virtual indices
                         // but a more generic approach is mapping the fractional current position.
                         
+                        const rawInputRange = virtualLists.map((_, j) => j * ITEM_WIDTH);
+                        const rawOutputWidth = virtualLists.map((_, j) => (j % len) === i ? 24 : 8);
+                        const rawOutputOpacity = virtualLists.map((_, j) => (j % len) === i ? 0.9 : 0.2);
+
+                        const safeInputRange = rawInputRange.length > 1 ? rawInputRange : [0, ITEM_WIDTH];
+                        const safeOutputWidth = rawOutputWidth.length > 1 ? rawOutputWidth : [(i === 0 ? 24 : 8), (i === 0 ? 24 : 8)];
+                        const safeOutputOpacity = rawOutputOpacity.length > 1 ? rawOutputOpacity : [(i === 0 ? 0.9 : 0.2), (i === 0 ? 0.9 : 0.2)];
+
                         const dotWidth = scrollX.interpolate({
-                          inputRange: virtualLists.map((_, j) => j * ITEM_WIDTH),
-                          outputRange: virtualLists.map((_, j) => (j % len) === i ? 24 : 8),
+                          inputRange: safeInputRange,
+                          outputRange: safeOutputWidth,
                           extrapolate: 'clamp'
                         });
                         
                         const dotOpacity = scrollX.interpolate({
-                          inputRange: virtualLists.map((_, j) => j * ITEM_WIDTH),
-                          outputRange: virtualLists.map((_, j) => (j % len) === i ? 0.9 : 0.2),
+                          inputRange: safeInputRange,
+                          outputRange: safeOutputOpacity,
                           extrapolate: 'clamp'
                         });
 
