@@ -74,7 +74,7 @@ export const ListsScreen = ({ navigation }: any) => {
     const isCompleted = index === 0;
     
     const ITEM_WIDTH = width * 0.75;
-    const CARD_WIDTH = ITEM_WIDTH - 24; // 12px gap on each side inside the wrapper
+    const CARD_WIDTH = ITEM_WIDTH - 16; // 8px gap on each side inside the wrapper, reducing distance
     
     // Snapping physics math
     const inputRange = [
@@ -85,7 +85,13 @@ export const ListsScreen = ({ navigation }: any) => {
 
     const scale = scrollX.interpolate({
       inputRange,
-      outputRange: [0.85, 1, 0.85],
+      outputRange: [0.92, 1, 0.92], // Not as small, closer to original size
+      extrapolate: 'clamp',
+    });
+
+    const translateY = scrollX.interpolate({
+      inputRange,
+      outputRange: [70, 0, 70], // Placed significantly lower on the sides
       extrapolate: 'clamp',
     });
 
@@ -97,7 +103,7 @@ export const ListsScreen = ({ navigation }: any) => {
 
     const rotateX = scrollX.interpolate({
       inputRange,
-      outputRange: ['15deg', '0deg', '15deg'], // Positive pushes the top backwards
+      outputRange: ['15deg', '0deg', '15deg'],
       extrapolate: 'clamp',
     });
 
@@ -107,10 +113,11 @@ export const ListsScreen = ({ navigation }: any) => {
           styles.carouselPhysicalCard, 
           { 
             width: CARD_WIDTH,
-            backgroundColor: cardColors[index % cardColors.length], // The entire card takes the color
+            backgroundColor: cardColors[index % cardColors.length], 
             transform: [
-              { perspective: 850 }, // Stronger 3D pop
+              { perspective: 850 }, 
               { scale }, 
+              { translateY },
               { rotateX },
               { rotateY }
             ]
@@ -211,7 +218,7 @@ export const ListsScreen = ({ navigation }: any) => {
                   horizontal
                   showsHorizontalScrollIndicator={false}
                   keyExtractor={(item) => item.id}
-                  contentContainerStyle={{ paddingHorizontal: (width - (width * 0.75)) / 2, paddingVertical: 20 }}
+                  contentContainerStyle={{ paddingHorizontal: (width - (width * 0.75)) / 2, paddingTop: 20, paddingBottom: 100 }}
                   snapToInterval={width * 0.75}
                   snapToAlignment="start"
                   decelerationRate="fast"
