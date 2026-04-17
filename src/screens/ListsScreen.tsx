@@ -105,17 +105,6 @@ export const ListsScreen = ({ navigation }: any) => {
     });
   };
 
-  const locale = Intl.DateTimeFormat().resolvedOptions().locale;
-  const now = new Date();
-  const weekdayRaw = now.toLocaleDateString(locale, { weekday: 'long' });
-  const todayWeekday =
-    weekdayRaw.charAt(0).toLocaleUpperCase(locale) + weekdayRaw.slice(1);
-  const todayFullDate = now.toLocaleDateString(locale, {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
-
   const cardColors = ['#A5E3C1', '#36C185', '#57C693', '#F2AE72', '#EED8A1'];
 
   // Static Lists
@@ -393,60 +382,60 @@ export const ListsScreen = ({ navigation }: any) => {
 
         {activeTab === 'today' && (
           <View style={styles.contentSection}>
-            <View style={styles.todayDateHeader}>
-              <Text style={styles.todayWeekday}>{todayWeekday}</Text>
-              <Text style={styles.todayFullDate}>{todayFullDate}</Text>
-            </View>
-
             <View style={styles.todayFoodList}>
               {todayItems.map((item) => (
-                <TodayFoodRow key={item.id} onPress={() => toggleTodayItem(item.id)}>
-                  <View
-                    style={[
-                      styles.todayCheckbox,
-                      item.checked && styles.todayCheckboxChecked,
-                    ]}
-                  >
-                    {item.checked ? (
-                      <Check size={14} color={Colors.white} strokeWidth={3} />
-                    ) : null}
-                  </View>
-                  <View style={styles.todayItemTextWrap}>
-                    <TextInput
-                      editable={false}
-                      pointerEvents="none"
-                      value={item.name}
-                      scrollEnabled={false}
-                      caretHidden
-                      selectTextOnFocus={false}
-                      numberOfLines={1}
-                      style={[styles.todayItemInput, item.checked && styles.todayItemLabelDone]}
-                      underlineColorAndroid="transparent"
-                    />
-                  </View>
-                </TodayFoodRow>
+                <View key={item.id} style={styles.todayItemCell}>
+                  <TodayFoodRow onPress={() => toggleTodayItem(item.id)}>
+                    <View
+                      style={[
+                        styles.todayCheckbox,
+                        item.checked && styles.todayCheckboxChecked,
+                      ]}
+                    >
+                      {item.checked ? (
+                        <Check size={14} color={Colors.white} strokeWidth={3} />
+                      ) : null}
+                    </View>
+                    <View style={styles.todayItemTextWrap}>
+                      <TextInput
+                        editable={false}
+                        pointerEvents="none"
+                        value={item.name}
+                        scrollEnabled={false}
+                        caretHidden
+                        selectTextOnFocus={false}
+                        numberOfLines={1}
+                        style={[styles.todayItemInput, item.checked && styles.todayItemLabelDone]}
+                        underlineColorAndroid="transparent"
+                      />
+                    </View>
+                  </TodayFoodRow>
+                  <View style={styles.todayItemHairline} />
+                </View>
               ))}
 
               {newTodayItemMode ? (
-                <TodayFoodRow>
-                  <View style={styles.todayCheckbox} />
-                  <View style={styles.todayItemTextWrap}>
-                    <TextInput
-                      style={styles.todayItemInput}
-                      value={newTodayItemName}
-                      onChangeText={setNewTodayItemName}
-                      placeholder=""
-                      onSubmitEditing={handleAddTodayItem}
-                      onBlur={handleAddTodayItem}
-                      returnKeyType="done"
-                      blurOnSubmit
-                      autoFocus
-                      multiline={false}
-                      numberOfLines={1}
-                      underlineColorAndroid="transparent"
-                    />
-                  </View>
-                </TodayFoodRow>
+                <View style={styles.todayItemCell}>
+                  <TodayFoodRow>
+                    <View style={styles.todayCheckbox} />
+                    <View style={styles.todayItemTextWrap}>
+                      <TextInput
+                        style={styles.todayItemInput}
+                        value={newTodayItemName}
+                        onChangeText={setNewTodayItemName}
+                        placeholder=""
+                        onSubmitEditing={handleAddTodayItem}
+                        onBlur={handleAddTodayItem}
+                        returnKeyType="done"
+                        blurOnSubmit
+                        autoFocus
+                        multiline={false}
+                        numberOfLines={1}
+                        underlineColorAndroid="transparent"
+                      />
+                    </View>
+                  </TodayFoodRow>
+                </View>
               ) : (
                 <TodayFoodRow onPress={() => setNewTodayItemMode(true)}>
                   <View style={styles.todayCheckboxSlot}>
@@ -479,27 +468,17 @@ const styles = StyleSheet.create({
   contentSection: { flex: 1 },
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 24, paddingVertical: 24 },
   sectionTitle: { fontFamily: 'Inter_800ExtraBold', fontSize: 26, lineHeight: 32, color: '#111' },
-  todayDateHeader: {
-    paddingHorizontal: 24,
-    paddingTop: 8,
-    paddingBottom: 20,
-    alignItems: 'flex-start',
-  },
-  todayWeekday: {
-    fontFamily: 'Lora_700Bold',
-    fontSize: 28,
-    lineHeight: 34,
-    color: Colors.textHeading,
-  },
-  todayFullDate: {
-    fontFamily: 'Inter_500Medium',
-    fontSize: 15,
-    lineHeight: 22,
-    color: Colors.textLight,
-    marginTop: 6,
-  },
   todayFoodList: {
     marginTop: 4,
+  },
+  todayItemCell: {
+    width: '100%',
+  },
+  /** Même largeur que le contenu (padding 24) : pas d’arête à bord d’écran. */
+  todayItemHairline: {
+    height: 1,
+    marginHorizontal: 24,
+    backgroundColor: 'rgba(17, 17, 17, 0.07)',
   },
   todayItemRow: {
     flexDirection: 'row',
@@ -507,8 +486,6 @@ const styles = StyleSheet.create({
     minHeight: 52,
     paddingVertical: 14,
     paddingHorizontal: 24,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: Colors.border,
   },
   todayCheckbox: {
     width: TODAY_LINE_H,
