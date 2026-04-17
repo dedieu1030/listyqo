@@ -253,22 +253,14 @@ export const ListsScreen = ({ navigation }: any) => {
                         // but a more generic approach is mapping the fractional current position.
                         
                         const dotWidth = scrollX.interpolate({
-                          inputRange: isInfinite 
-                            ? Array(11).fill(0).map((_, idx) => (initialIndex - 5 + idx) * ITEM_WIDTH)
-                            : lists.map((_, idx) => idx * ITEM_WIDTH),
-                          outputRange: isInfinite
-                            ? Array(11).fill(0).map((_, idx) => ((initialIndex - 5 + idx) % len) === i ? 24 : 8)
-                            : lists.map((_, idx) => idx === i ? 24 : 8),
+                          inputRange: virtualLists.map((_, j) => j * ITEM_WIDTH),
+                          outputRange: virtualLists.map((_, j) => (j % len) === i ? 24 : 8),
                           extrapolate: 'clamp'
                         });
                         
                         const dotOpacity = scrollX.interpolate({
-                          inputRange: isInfinite 
-                            ? Array(11).fill(0).map((_, idx) => (initialIndex - 5 + idx) * ITEM_WIDTH)
-                            : lists.map((_, idx) => idx * ITEM_WIDTH),
-                          outputRange: isInfinite
-                            ? Array(11).fill(0).map((_, idx) => ((initialIndex - 5 + idx) % len) === i ? 0.9 : 0.2)
-                            : lists.map((_, idx) => idx === i ? 0.9 : 0.2),
+                          inputRange: virtualLists.map((_, j) => j * ITEM_WIDTH),
+                          outputRange: virtualLists.map((_, j) => (j % len) === i ? 0.9 : 0.2),
                           extrapolate: 'clamp'
                         });
 
@@ -279,6 +271,9 @@ export const ListsScreen = ({ navigation }: any) => {
                           />
                         );
                       })}
+                    </View>
+                    <Text style={styles.swipeText}>Swipe To Next List</Text>
+                  </View>
                 </View>
               ) : (
                 lists.map((list, index) => {
