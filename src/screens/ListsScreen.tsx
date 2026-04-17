@@ -73,8 +73,17 @@ export const ListsScreen = ({ navigation }: any) => {
   // Infinite Carousel Logic
   const BUFFER_SETS = 50;
   const itemCount = lists.length;
+  const isInfinite = itemCount >= 3;
+  
   const virtualLists = React.useMemo(() => {
     if (itemCount === 0) return [];
+    if (!isInfinite) {
+      return lists.map((list: any, idx: number) => ({
+        ...list,
+        virtualId: `${list.id}-single`,
+        realIndex: idx
+      }));
+    }
     return Array(BUFFER_SETS).fill(0).flatMap((_, setIdx) => 
       lists.map((list: any, idx: number) => ({
         ...list,
@@ -82,7 +91,9 @@ export const ListsScreen = ({ navigation }: any) => {
         realIndex: idx
       }))
     );
-  }, [lists, itemCount]);
+  }, [lists, itemCount, isInfinite]);
+
+  const initialIndex = isInfinite ? Math.floor(BUFFER_SETS / 2) * itemCount : 0;
 
   const renderCarouselItem = (item: any, index: number) => {
     const isCompleted = item.realIndex === 0;
@@ -237,7 +248,7 @@ export const ListsScreen = ({ navigation }: any) => {
                     snapToInterval={width * 0.75}
                     snapToAlignment="start"
                     decelerationRate="fast"
-                    initialScrollIndex={itemCount > 1 ? Math.floor(BUFFER_SETS / 2) * itemCount : 0}
+                    initialScrollIndex={itemCount > 0 ? initialIndex : 0}
                     getItemLayout={(_, index) => ({
                       length: width * 0.75,
                       offset: (width * 0.75) * index,
@@ -253,17 +264,23 @@ export const ListsScreen = ({ navigation }: any) => {
                     <View style={styles.paginationRow}>
                       {lists.map((_, i) => {
                         const ITEM_WIDTH = width * 0.75;
-                        const inputRange = virtualLists.map((_, j) => j * ITEM_WIDTH);
+                        const inputRange = virtualLists.length > 1 
+                                           ? virtualLists.map((_, j) => j * ITEM_WIDTH) 
+                                           : [0, ITEM_WIDTH]; // padded for 1 item
                         
                         const dotWidth = scrollX.interpolate({
                           inputRange,
-                          outputRange: virtualLists.map((_, j) => (j % lists.length === i) ? 24 : 8),
+                          outputRange: virtualLists.length > 1 
+                                       ? virtualLists.map((_, j) => (j % lists.length === i) ? 24 : 8)
+                                       : [24, 24],
                           extrapolate: 'clamp'
                         });
                         
                         const dotOpacity = scrollX.interpolate({
                           inputRange,
-                          outputRange: virtualLists.map((_, j) => (j % lists.length === i) ? 0.9 : 0.2),
+                          outputRange: virtualLists.length > 1 
+                                       ? virtualLists.map((_, j) => (j % lists.length === i) ? 0.9 : 0.2)
+                                       : [0.9, 0.9],
                           extrapolate: 'clamp'
                         });
 
