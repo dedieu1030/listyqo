@@ -199,6 +199,7 @@ export const ListsScreen = ({ navigation }: any) => {
                   keyExtractor={(item) => item.id}
                   contentContainerStyle={styles.carouselContainer}
                   snapToInterval={FULL_SIZE}
+                  snapToAlignment="center"
                   decelerationRate="fast"
                   onScroll={Animated.event(
                     [{ nativeEvent: { contentOffset: { x: scrollX } } }],
@@ -316,7 +317,10 @@ const styles = StyleSheet.create({
   dateText: { fontFamily: 'Inter_500Medium', fontSize: 16, color: '#8A8A8A', marginTop: 4 },
   
   // Carousel Specific
-  carouselContainer: { paddingLeft: 24, paddingRight: width * 0.3, paddingVertical: 20 },
+  carouselContainer: { 
+    paddingHorizontal: (width - CARD_WIDTH) / 2, 
+    paddingVertical: 20 
+  },
   carouselItemContainer: { width: CARD_WIDTH, marginRight: SPACING },
   carouselCard: { height: 320, borderRadius: 24, padding: 24, justifyContent: 'space-between', overflow: 'hidden' },
   carouselImageTop: { height: 120, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 20 },
