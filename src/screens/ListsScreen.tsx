@@ -219,7 +219,7 @@ export const ListsScreen = ({ navigation }: any) => {
                     horizontal
                     showsHorizontalScrollIndicator={false}
                     keyExtractor={(item) => item.id}
-                    contentContainerStyle={{ paddingHorizontal: (width - (width * 0.75)) / 2, paddingTop: 20, paddingBottom: 20 }}
+                    contentContainerStyle={{ paddingHorizontal: (width - (width * 0.75)) / 2, paddingTop: 20, paddingBottom: 80 }}
                     snapToInterval={width * 0.75}
                     snapToAlignment="start"
                     decelerationRate="fast"
