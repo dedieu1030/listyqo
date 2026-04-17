@@ -1,230 +1,237 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, ScrollView } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../theme/colors';
 import { useStore } from '../store';
-import { ChevronLeft, Plus, MoreHorizontal, CheckCircle2, Circle, Search } from 'lucide-react-native';
+import { Trash, Share, Plus, Check } from 'lucide-react-native';
 
 export const ListDetailsScreen = ({ route, navigation }: any) => {
   const { listId, listName } = route.params;
-  const { lists, toggleItemChecked, deleteItemFromList } = useStore();
-  const [searchQuery, setSearchQuery] = useState('');
+  const { lists, toggleItemChecked, deleteItemFromList, updateItemInList, deleteList, addItemToList } = useStore();
+  
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
 
   const list = lists.find(l => l.id === listId);
   const items = list ? list.items : [];
 
-  const filteredItems = items.filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
+  const handleEditItem = (id: string, newText: string) => {
+    updateItemInList(listId, id, { name: newText });
+  };
 
-  const renderItem = ({ item }: { item: any }) => (
-    <TouchableOpacity 
-      style={styles.itemRow} 
-      onPress={() => toggleItemChecked(listId, item.id)}
-    >
-      <View style={styles.itemCheck}>
-        {item.checked ? (
-          <CheckCircle2 color={Colors.primary} size={24} fill={Colors.highlightPill} />
+  const handleCreateNewItem = () => {
+    setIsEditing(true);
+    const newItemId = Date.now().toString();
+    addItemToList(listId, { name: '', checked: false, quantity: 1, unit: 'pc' });
+    setEditingItemId(newItemId); // Automatically focus the new item
+  };
+
+  const renderItem = ({ item }: { item: any }) => {
+    const isFocused = editingItemId === item.id;
+    const isChecked = item.checked;
+
+    return (
+      <View style={[styles.itemRow, isFocused && styles.itemRowFocused]}>
+        <TouchableOpacity 
+          style={styles.checkboxContainer} 
+          onPress={() => toggleItemChecked(listId, item.id)}
+          disabled={isEditing && isFocused} // Prevent toggle when explicitly editing name
+        >
+          <View style={styles.checkbox}>
+            {isChecked && <Check color={Colors.black} size={16} strokeWidth={3} />}
+          </View>
+        </TouchableOpacity>
+
+        {isEditing ? (
+          <TextInput
+            style={[
+              styles.itemInput,
+              isChecked && styles.itemNameChecked
+            ]}
+            value={item.name}
+            onChangeText={(text) => handleEditItem(item.id, text)}
+            onFocus={() => setEditingItemId(item.id)}
+            placeholder=""
+            selectionColor={Colors.accentRed}
+            autoFocus={isFocused}
+            onBlur={() => {
+              // Optional: remove item if empty on blur
+              if (item.name.trim() === '') {
+                 // deleteItemFromList(listId, item.id);
+              }
+            }}
+          />
         ) : (
-          <Circle color={Colors.border} size={24} />
+          <TouchableOpacity 
+            style={styles.itemTextContainer}
+            onPress={() => {
+              setIsEditing(true);
+              setEditingItemId(item.id);
+            }}
+            activeOpacity={0.7}
+          >
+            <Text style={[styles.itemName, isChecked && styles.itemNameChecked]}>
+              {item.name}
+            </Text>
+          </TouchableOpacity>
         )}
       </View>
-      <View style={styles.itemContent}>
-        <Text style={[styles.itemName, item.checked && styles.itemNameChecked]}>
-          {item.name}
-        </Text>
-        {(item.quantity || item.unit) && (
-          <Text style={styles.itemMeta}>
-            {item.quantity} {item.unit}
-          </Text>
-        )}
-      </View>
-      <TouchableOpacity 
-        style={styles.itemOptions}
-        onPress={() => navigation.navigate('ItemDetails', { listId, item })}
-      >
-        <MoreHorizontal color={Colors.textLight} size={20} />
-      </TouchableOpacity>
-    </TouchableOpacity>
-  );
+    );
+  };
+
+  if (!list) return null; // Fallback if list deleted
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <ChevronLeft size={28} color={Colors.black} />
-        </TouchableOpacity>
-        <Text style={styles.title} numberOfLines={1}>{listName}</Text>
-        <TouchableOpacity style={styles.headerButton}>
-          <MoreHorizontal size={24} color={Colors.black} />
-        </TouchableOpacity>
-      </View>
+      <KeyboardAvoidingView 
+        style={styles.container} 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <View style={styles.header}>
+          <TouchableOpacity 
+            style={styles.headerIcon} 
+            onPress={() => {
+              deleteList(listId);
+              navigation.goBack();
+            }}
+          >
+            <Trash color={Colors.accentRed} size={24} strokeWidth={2} />
+          </TouchableOpacity>
+          
+          <Text style={styles.title} numberOfLines={1}>List</Text>
 
-      <View style={styles.searchContainer}>
-        <Search size={20} color={Colors.textLight} style={styles.searchIcon} />
-        <TextInput 
-          style={styles.searchInput}
-          placeholder="Search items..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
-      </View>
+          {isEditing ? (
+            <TouchableOpacity 
+              style={styles.headerRightAction}
+              onPress={() => {
+                setIsEditing(false);
+                setEditingItemId(null);
+                // Clean up empty items
+                items.forEach(i => {
+                  if (i.name.trim() === '') deleteItemFromList(listId, i.id);
+                });
+              }}
+            >
+              <Text style={styles.actionText}>Done</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity 
+              style={styles.headerRightAction}
+              onPress={() => setIsEditing(true)}
+            >
+              <Share color={Colors.accentRed} size={22} strokeWidth={2} style={{ marginRight: 6 }} />
+              <Text style={styles.actionText}>Edit</Text>
+            </TouchableOpacity>
+          )}
+        </View>
 
-      <View style={styles.filterTabs}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10, paddingHorizontal: 20 }}>
-           <TouchableOpacity style={[styles.pill, styles.pillActive]}><Text style={styles.pillTextActive}>All</Text></TouchableOpacity>
-           <TouchableOpacity style={styles.pill}><Text style={styles.pillText}>Produce</Text></TouchableOpacity>
-           <TouchableOpacity style={styles.pill}><Text style={styles.pillText}>Dairy</Text></TouchableOpacity>
-           <TouchableOpacity style={styles.pill}><Text style={styles.pillText}>Meat</Text></TouchableOpacity>
-        </ScrollView>
-      </View>
-
-      <FlatList
-        data={filteredItems}
-        keyExtractor={item => item.id}
-        renderItem={renderItem}
-        contentContainerStyle={styles.listContainer}
-        ListEmptyComponent={() => (
-           <View style={styles.emptyContainer}>
-             <Text style={styles.emptyText}>No items here yet.</Text>
-           </View>
-        )}
-      />
-
-      <View style={styles.bottomBar}>
-        <TouchableOpacity 
-          style={styles.primaryButton}
-          onPress={() => navigation.navigate('AddItem', { listId })}
+        <ScrollView 
+          contentContainerStyle={styles.listContainer}
+          keyboardShouldPersistTaps="handled"
         >
-          <Text style={styles.primaryButtonText}>Add item</Text>
-        </TouchableOpacity>
-      </View>
+          {items.map(item => (
+            <React.Fragment key={item.id}>
+              {renderItem({ item })}
+            </React.Fragment>
+          ))}
+          
+          {!isEditing && (
+            <TouchableOpacity style={styles.addRow} onPress={handleCreateNewItem}>
+              <Plus color={Colors.black} size={24} strokeWidth={2} />
+            </TouchableOpacity>
+          )}
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: Colors.background },
+  container: { flex: 1 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
     paddingTop: 10,
-    paddingBottom: 20,
+    paddingBottom: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
   },
-  backButton: {
-    padding: 4,
+  headerIcon: {
+    width: 60,
+    alignItems: 'flex-start',
   },
   title: {
-    fontFamily: 'Inter_800ExtraBold',
-    fontSize: 24,
-    color: Colors.textHeading,
+    fontFamily: 'Inter_700Bold',
+    fontSize: 20,
+    color: Colors.black,
     flex: 1,
     textAlign: 'center',
   },
-  headerButton: {
-    padding: 4,
-  },
-  searchContainer: {
+  headerRightAction: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surface,
-    marginHorizontal: 20,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    marginBottom: 16,
+    width: 60,
+    justifyContent: 'flex-end',
   },
-  searchIcon: {
-    marginRight: 8,
-  },
-  searchInput: {
-    flex: 1,
-    paddingVertical: 12,
-    fontFamily: 'Inter_400Regular',
-    fontSize: 16,
-    color: Colors.textHeading,
-  },
-  filterTabs: {
-    marginBottom: 16,
-  },
-  pill: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: Colors.surface,
-  },
-  pillActive: {
-    backgroundColor: Colors.highlightPill,
-  },
-  pillText: {
+  actionText: {
+    color: Colors.accentRed,
     fontFamily: 'Inter_500Medium',
-    color: Colors.text,
-  },
-  pillTextActive: {
-    fontFamily: 'Inter_600SemiBold',
-    color: Colors.highlightIcon,
+    fontSize: 17,
   },
   listContainer: {
-    paddingHorizontal: 20,
     paddingBottom: 100,
   },
   itemRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 16,
+    minHeight: 60,
+    paddingHorizontal: 20,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: '#F5F5F5',
   },
-  itemCheck: {
-    marginRight: 16,
+  itemRowFocused: {
+    backgroundColor: Colors.accentPinkLight,
   },
-  itemContent: {
+  checkboxContainer: {
+    paddingRight: 16,
+    paddingVertical: 10,
+  },
+  checkbox: {
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    borderWidth: 1.5,
+    borderColor: Colors.black,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  itemTextContainer: {
     flex: 1,
+    paddingVertical: 18,
   },
   itemName: {
-    fontFamily: 'Inter_500Medium',
-    fontSize: 16,
-    color: Colors.textHeading,
-    marginBottom: 4,
+    fontFamily: 'Inter_400Regular',
+    fontSize: 17,
+    color: '#000000',
+  },
+  itemInput: {
+    flex: 1,
+    fontFamily: 'Inter_400Regular',
+    fontSize: 17,
+    color: '#000000',
+    paddingVertical: 18,
   },
   itemNameChecked: {
     textDecorationLine: 'line-through',
-    color: Colors.textLight,
+    color: '#A0A0A0', // the greyed out text equivalent
   },
-  itemMeta: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 14,
-    color: Colors.textLight,
-  },
-  itemOptions: {
-    padding: 8,
-  },
-  emptyContainer: {
+  addRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 40,
+    height: 60,
+    paddingHorizontal: 20,
   },
-  emptyText: {
-    fontFamily: 'Inter_400Regular',
-    color: Colors.textLight,
-  },
-  bottomBar: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    padding: 24,
-    backgroundColor: Colors.background,
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
-  },
-  primaryButton: {
-    backgroundColor: Colors.black,
-    borderRadius: 30,
-    paddingVertical: 16,
-    alignItems: 'center',
-  },
-  primaryButtonText: {
-    color: Colors.white,
-    fontFamily: 'Inter_600SemiBold',
-    fontSize: 16,
-  }
 });

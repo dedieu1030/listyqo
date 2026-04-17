@@ -14,5 +14,10 @@ export const Colors = {
   
   highlightPill: '#E8E6DF', 
   highlightIcon: '#E85D36', 
-  border: '#F0EFEA', // Internal separators
+  border: '#EBEAE4', // Internal separators
+  
+  // New accent colors for modern list view
+  accentRed: '#F35C6E',
+  accentPinkLight: '#FEEDF0',
+  emptyBorder: '#D1D1D6',
 };

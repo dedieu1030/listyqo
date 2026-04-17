@@ -1,15 +1,5 @@
 import React, { useState, useRef } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  TextInput,
-  Dimensions,
-  Animated,
-  Platform,
-} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Dimensions, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../theme/colors';
 import { useStore } from '../store';
@@ -44,7 +34,7 @@ const MockDaisy = ({ size = 40, color = "#FFFFFF" }) => (
 export const ListsScreen = ({ navigation }: any) => {
   const { 
     lists, addList, 
-    todayItems, addTodayItem, toggleTodayItem 
+    todayItems, addTodayItem, toggleTodayItem, deleteTodayItem 
   } = useStore();
   const [activeTab, setActiveTab] = useState<'today' | 'week'>('week');
   const [viewMode, setViewMode] = useState<'list' | 'carousel'>('carousel');
@@ -52,11 +42,11 @@ export const ListsScreen = ({ navigation }: any) => {
   const [newListMode, setNewListMode] = useState(false);
   const [newListName, setNewListName] = useState('');
 
-  const [todayDraft, setTodayDraft] = useState('');
-  const todayDraftRef = useRef('');
-  const todayAddInputRef = useRef<React.ComponentRef<typeof TextInput>>(null);
+  const [newTodayItemMode, setNewTodayItemMode] = useState(false);
+  const [newTodayItemName, setNewTodayItemName] = useState('');
 
   const scrollX = useRef(new Animated.Value(0)).current;
+  const todayDraftCommitLock = useRef(false);
 
   const handleCreateList = () => {
     if (newListName.trim().length > 0) {
@@ -66,13 +56,19 @@ export const ListsScreen = ({ navigation }: any) => {
     }
   };
 
-  const commitTodayDraft = React.useCallback(() => {
-    const name = todayDraftRef.current.trim();
-    if (name.length === 0) return;
-    addTodayItem(name);
-    todayDraftRef.current = '';
-    setTodayDraft('');
-  }, [addTodayItem]);
+  const handleAddTodayItem = () => {
+    if (todayDraftCommitLock.current) return;
+    todayDraftCommitLock.current = true;
+    const t = newTodayItemName.trim();
+    if (t.length > 0) {
+      addTodayItem(t);
+      setNewTodayItemName('');
+    }
+    setNewTodayItemMode(false);
+    queueMicrotask(() => {
+      todayDraftCommitLock.current = false;
+    });
+  };
 
   const locale = Intl.DateTimeFormat().resolvedOptions().locale;
   const now = new Date();
@@ -182,12 +178,7 @@ export const ListsScreen = ({ navigation }: any) => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-        keyboardDismissMode="on-drag"
-      >
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         
         {/* Header Area */}
         <View style={styles.headerArea}>
@@ -372,73 +363,60 @@ export const ListsScreen = ({ navigation }: any) => {
               <Text style={styles.todayFullDate}>{todayFullDate}</Text>
             </View>
 
-            <View style={styles.todayListBlock}>
+            <View style={styles.todayFoodList}>
               {todayItems.map((item) => (
-                <View key={item.id}>
-                  <View style={styles.todayItemInner}>
-                    <TouchableOpacity
-                      onPress={() => toggleTodayItem(item.id)}
-                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                      style={styles.todayCheckboxCell}
-                      accessibilityRole="checkbox"
-                      accessibilityState={{ checked: item.checked }}
-                    >
-                      {item.checked ? (
-                        <View style={[styles.todayCheckboxBox, styles.todayCheckboxBoxOn]}>
-                          <Check size={14} color={Colors.textHeading} strokeWidth={2.5} />
-                        </View>
-                      ) : (
-                        <View style={styles.todayCheckboxBox} />
-                      )}
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={styles.todayItemLabelWrap}
-                      onPress={() => toggleTodayItem(item.id)}
-                      activeOpacity={0.7}
-                    >
-                      <Text
-                        style={[styles.todayItemLabel, item.checked && styles.todayItemLabelChecked]}
-                        numberOfLines={3}
-                      >
-                        {item.name}
-                      </Text>
-                    </TouchableOpacity>
+                <TouchableOpacity
+                  key={item.id}
+                  style={styles.todayItemRow}
+                  onPress={() => toggleTodayItem(item.id)}
+                  activeOpacity={0.65}
+                >
+                  <View
+                    style={[
+                      styles.todayCheckbox,
+                      item.checked && styles.todayCheckboxChecked,
+                    ]}
+                  >
+                    {item.checked ? (
+                      <Check size={14} color={Colors.white} strokeWidth={3} />
+                    ) : null}
                   </View>
-                  <View style={styles.todayDividerInset} />
-                </View>
+                  <Text
+                    style={[styles.todayItemLabel, item.checked && styles.todayItemLabelDone]}
+                    numberOfLines={1}
+                  >
+                    {item.name}
+                  </Text>
+                </TouchableOpacity>
               ))}
 
-              <View>
-                <View style={[styles.todayItemInner, styles.todayComposerInner]}>
-                  <TouchableOpacity
-                    accessibilityLabel="Focus add item field"
-                    onPress={() => todayAddInputRef.current?.focus()}
-                    style={[styles.todayCheckboxCell, styles.todayComposerLeading]}
-                    activeOpacity={0.7}
-                  >
-                    <View style={styles.todayCheckboxBox} />
-                  </TouchableOpacity>
+              {newTodayItemMode ? (
+                <View style={[styles.todayItemRow, styles.todayAddRow]}>
+                  <View style={styles.todayCheckbox} />
                   <TextInput
-                    ref={todayAddInputRef}
                     style={styles.todayAddInput}
-                    value={todayDraft}
-                    onChangeText={(t) => {
-                      todayDraftRef.current = t;
-                      setTodayDraft(t);
-                    }}
-                    placeholder="Add item..."
+                    value={newTodayItemName}
+                    onChangeText={setNewTodayItemName}
+                    placeholder="Add item"
                     placeholderTextColor={Colors.textLight}
+                    onSubmitEditing={handleAddTodayItem}
+                    onBlur={handleAddTodayItem}
                     returnKeyType="done"
-                    blurOnSubmit={false}
-                    onSubmitEditing={commitTodayDraft}
-                    onBlur={() => setTimeout(commitTodayDraft, 0)}
-                    multiline={false}
-                    autoCorrect
-                    autoCapitalize="sentences"
-                    underlineColorAndroid="transparent"
+                    blurOnSubmit
+                    autoFocus
                   />
                 </View>
-              </View>
+              ) : (
+                <TouchableOpacity
+                  style={[styles.todayItemRow, styles.todayPlusRow]}
+                  onPress={() => setNewTodayItemMode(true)}
+                  activeOpacity={0.65}
+                >
+                  <View style={styles.todayCheckboxSlot}>
+                    <Plus size={20} color={Colors.textHeading} strokeWidth={2.2} />
+                  </View>
+                </TouchableOpacity>
+              )}
             </View>
           </View>
         )}
@@ -483,86 +461,63 @@ const styles = StyleSheet.create({
     color: Colors.textLight,
     marginTop: 6,
   },
-
-  todayListBlock: {
-    paddingBottom: 24,
+  todayFoodList: {
+    marginTop: 4,
   },
-  /** Same horizontal bounds as `todayItemInner` (24), not edge-to-edge screen */
-  todayDividerInset: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: Colors.border,
-    marginHorizontal: 24,
-  },
-  todayItemInner: {
+  todayItemRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: 14,
     paddingHorizontal: 24,
-    minHeight: 52,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: Colors.border,
   },
-  todayComposerInner: {
-    alignItems: 'stretch',
-    paddingVertical: 0,
-    paddingTop: 0,
-    paddingBottom: 0,
-  },
-  todayCheckboxCell: {
-    width: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  todayComposerLeading: {
-    minHeight: 52,
-    justifyContent: 'center',
-    alignSelf: 'stretch',
-  },
-  todayCheckboxBox: {
+  todayCheckbox: {
     width: 22,
     height: 22,
-    borderRadius: 4,
+    borderRadius: 5,
     borderWidth: 1.5,
-    borderColor: '#C8C8C8',
-    backgroundColor: Colors.white,
-  },
-  todayCheckboxBoxOn: {
-    borderColor: Colors.textHeading,
-    justifyContent: 'center',
+    borderColor: '#D8D6D0',
+    marginRight: 14,
     alignItems: 'center',
-  },
-  todayItemLabelWrap: {
-    flex: 1,
-    paddingLeft: 4,
     justifyContent: 'center',
+    backgroundColor: Colors.background,
+  },
+  todayCheckboxChecked: {
+    borderColor: Colors.black,
+    backgroundColor: Colors.black,
   },
   todayItemLabel: {
-    fontFamily: 'Inter_400Regular',
+    flex: 1,
+    fontFamily: 'Inter_500Medium',
     fontSize: 16,
     lineHeight: 22,
     color: Colors.textHeading,
   },
-  todayItemLabelChecked: {
+  todayItemLabelDone: {
     textDecorationLine: 'line-through',
     color: Colors.textLight,
   },
+  todayCheckboxSlot: {
+    width: 22,
+    height: 22,
+    marginRight: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  todayAddRow: {
+    paddingVertical: 10,
+  },
   todayAddInput: {
     flex: 1,
-    alignSelf: 'stretch',
-    minHeight: 52,
-    paddingTop: Platform.OS === 'ios' ? 14 : 10,
-    paddingBottom: Platform.OS === 'ios' ? 14 : 10,
-    paddingLeft: 8,
-    paddingRight: 8,
-    margin: 0,
-    fontFamily: 'Inter_400Regular',
+    fontFamily: 'Inter_500Medium',
     fontSize: 16,
     color: Colors.textHeading,
-    ...Platform.select({
-      ios: { lineHeight: 20 },
-      android: {
-        textAlignVertical: 'center',
-        includeFontPadding: false,
-      },
-    }),
+    paddingVertical: 4,
+    margin: 0,
+  },
+  todayPlusRow: {
+    minHeight: 48,
   },
 
   // Carousel Specific
@@ -608,13 +563,17 @@ const styles = StyleSheet.create({
   listItemRow: { width: '100%', paddingVertical: 12 },
   listItemRowFocused: { backgroundColor: '#F5F4EE' },
   rowContent: { flexDirection: 'row', paddingHorizontal: 24 },
+  rowContentCompact: { flexDirection: 'row', paddingHorizontal: 24, alignItems: 'center' },
   colorSquare: { width: 140, height: 130, borderRadius: 20, padding: 16, justifyContent: 'space-between', position: 'relative', overflow: 'hidden' },
+  colorSquareSmall: { width: 80, height: 80, borderRadius: 16, justifyContent: 'center', alignItems: 'center', position: 'relative', overflow: 'hidden' },
   decorativeWrapper: { position: 'absolute' },
   squareTitle: { fontFamily: 'Inter_800ExtraBold', fontSize: 17, color: '#000', lineHeight: 22 },
   squareBottom: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' },
   squareSubtitle: { fontFamily: 'Inter_500Medium', fontSize: 14, color: '#000' },
   listDetails: { flex: 1, marginLeft: 20, justifyContent: 'space-between', paddingVertical: 4 },
+  listDetailsCompact: { flex: 1, marginLeft: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   listDesc: { fontFamily: 'Inter_400Regular', fontSize: 15, color: '#666', lineHeight: 20, paddingRight: 10 },
+  itemText: { fontFamily: 'Inter_700Bold', fontSize: 18, color: '#111' },
   btnPrimary: { backgroundColor: '#111', alignSelf: 'flex-start', paddingHorizontal: 24, paddingVertical: 12, borderRadius: 30 },
   btnPrimaryText: { fontFamily: 'Inter_700Bold', color: '#FFF', fontSize: 15 },
   btnPlain: { alignSelf: 'flex-end', paddingVertical: 12 },
