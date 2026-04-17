@@ -95,6 +95,12 @@ export const ListsScreen = ({ navigation }: any) => {
       extrapolate: 'clamp',
     });
 
+    const rotateX = scrollX.interpolate({
+      inputRange,
+      outputRange: ['15deg', '0deg', '15deg'], // The top tilts backwards into the screen
+      extrapolate: 'clamp',
+    });
+
     return (
       <View style={{ width: ITEM_WIDTH, justifyContent: 'center', alignItems: 'center' }}>
         <Animated.View style={[
@@ -103,8 +109,9 @@ export const ListsScreen = ({ navigation }: any) => {
             width: CARD_WIDTH,
             backgroundColor: cardColors[index % cardColors.length], // The entire card takes the color
             transform: [
-              { perspective: 1000 }, 
+              { perspective: 850 }, // Stronger 3D pop
               { scale }, 
+              { rotateX },
               { rotateY }
             ]
           }
