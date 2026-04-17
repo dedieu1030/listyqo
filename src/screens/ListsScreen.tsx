@@ -97,11 +97,29 @@ export const ListsScreen = ({ navigation }: any) => {
       extrapolate: 'clamp',
     });
 
+    const bgOpacity = scrollX.interpolate({
+      inputRange,
+      outputRange: [0, 1, 0],
+      extrapolate: 'clamp',
+    });
+
     return (
       <Animated.View style={[
         styles.carouselItemContainer, 
-        { transform: [{ scale }, { perspective: 800 }, { rotateY }], opacity }
+        { 
+          transform: [
+            { scale }, 
+            { perspective: 1000 }, 
+            { rotateY }
+          ], 
+          opacity 
+        }
       ]}>
+        <Animated.View style={[
+          styles.carouselFocusBackground, 
+          { opacity: bgOpacity }
+        ]} />
+        
         <TouchableOpacity 
           activeOpacity={0.8}
           onPress={() => navigation.navigate('ListDetails', { listId: item.id, listName: item.name })}
@@ -113,7 +131,7 @@ export const ListsScreen = ({ navigation }: any) => {
           </View>
           
           <View style={styles.carouselInfoBottom}>
-            <Text style={styles.carouselListTitle}>{item.name}</Text>
+            <Text style={styles.carouselListTitle} numberOfLines={1}>{item.name}</Text>
             <View style={styles.carouselMeta}>
               <Text style={styles.carouselLessonText}>Lesson {index + 1}</Text>
               {isCompleted && <CheckCircle size={20} color="#000" strokeWidth={2.5} />}
@@ -123,7 +141,7 @@ export const ListsScreen = ({ navigation }: any) => {
         
         {/* Detail text below card in carousel mode */}
         <View style={styles.carouselDetails}>
-            <Text style={styles.carouselDesc}>Learn to say which languages you speak and manage your inventory.</Text>
+            <Text style={styles.carouselDesc} numberOfLines={2}>Learn to say which languages you speak and manage your inventory.</Text>
             <TouchableOpacity 
               style={styles.btnPrimaryCarousel}
               onPress={() => navigation.navigate('ListDetails', { listId: item.id, listName: item.name })}
@@ -321,7 +339,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: (width - CARD_WIDTH) / 2, 
     paddingVertical: 20 
   },
-  carouselItemContainer: { width: CARD_WIDTH, marginRight: SPACING },
+  carouselItemContainer: { width: CARD_WIDTH, marginRight: SPACING, position: 'relative' },
+  carouselFocusBackground: {
+    position: 'absolute',
+    top: -15, // Provide some breathing room around the card
+    left: -15,
+    right: -15,
+    bottom: -40, // Cover the details/button as well
+    backgroundColor: '#F5F4EE', 
+    borderRadius: 32,
+    zIndex: -1,
+  },
   carouselCard: { height: 320, borderRadius: 24, padding: 24, justifyContent: 'space-between', overflow: 'hidden' },
   carouselImageTop: { height: 120, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 20 },
   carouselInfoBottom: { },
