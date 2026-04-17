@@ -70,8 +70,22 @@ export const ListsScreen = ({ navigation }: any) => {
 
   const cardColors = ['#A5E3C1', '#36C185', '#57C693', '#F2AE72', '#EED8A1'];
 
+  // Infinite Carousel Logic
+  const BUFFER_SETS = 50;
+  const itemCount = lists.length;
+  const virtualLists = React.useMemo(() => {
+    if (itemCount === 0) return [];
+    return Array(BUFFER_SETS).fill(0).flatMap((_, setIdx) => 
+      lists.map((list: any, idx: number) => ({
+        ...list,
+        virtualId: `${list.id}-${setIdx}-${idx}`,
+        realIndex: idx
+      }))
+    );
+  }, [lists, itemCount]);
+
   const renderCarouselItem = (item: any, index: number) => {
-    const isCompleted = index === 0;
+    const isCompleted = item.realIndex === 0;
     
     const ITEM_WIDTH = width * 0.75;
     const CARD_WIDTH = ITEM_WIDTH - 16; // 8px gap on each side inside the wrapper, reducing distance
@@ -138,7 +152,7 @@ export const ListsScreen = ({ navigation }: any) => {
               <View>
                 <Text style={styles.carouselListTitle} numberOfLines={1}>{item.name}</Text>
                 <View style={styles.carouselMeta}>
-                  <Text style={styles.carouselLessonText}>Lesson {index + 1}</Text>
+                  <Text style={styles.carouselLessonText}>Lesson {item.realIndex + 1}</Text>
                   {isCompleted && <CheckCircle size={20} color="#111" strokeWidth={2.5} />}
                 </View>
                 <Text style={styles.carouselDesc} numberOfLines={2}>Learn how to manage this list.</Text>
@@ -215,14 +229,20 @@ export const ListsScreen = ({ navigation }: any) => {
               viewMode === 'carousel' ? (
                 <View>
                   <Animated.FlatList
-                    data={lists}
+                    data={virtualLists}
                     horizontal
                     showsHorizontalScrollIndicator={false}
-                    keyExtractor={(item) => item.id}
+                    keyExtractor={(item) => item.virtualId}
                     contentContainerStyle={{ paddingHorizontal: (width - (width * 0.75)) / 2, paddingTop: 20, paddingBottom: 80 }}
                     snapToInterval={width * 0.75}
                     snapToAlignment="start"
                     decelerationRate="fast"
+                    initialScrollIndex={itemCount > 1 ? Math.floor(BUFFER_SETS / 2) * itemCount : 0}
+                    getItemLayout={(_, index) => ({
+                      length: width * 0.75,
+                      offset: (width * 0.75) * index,
+                      index,
+                    })}
                     onScroll={Animated.event(
                       [{ nativeEvent: { contentOffset: { x: scrollX } } }],
                       { useNativeDriver: false } // Required false for animating width
@@ -233,20 +253,18 @@ export const ListsScreen = ({ navigation }: any) => {
                     <View style={styles.paginationRow}>
                       {lists.map((_, i) => {
                         const ITEM_WIDTH = width * 0.75;
-                        const activeFactor = scrollX.interpolate({
-                          inputRange: [(i - 1) * ITEM_WIDTH, i * ITEM_WIDTH, (i + 1) * ITEM_WIDTH],
-                          outputRange: [0, 1, 0],
+                        const inputRange = virtualLists.map((_, j) => j * ITEM_WIDTH);
+                        
+                        const dotWidth = scrollX.interpolate({
+                          inputRange,
+                          outputRange: virtualLists.map((_, j) => (j % lists.length === i) ? 24 : 8),
                           extrapolate: 'clamp'
                         });
                         
-                        const dotWidth = activeFactor.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [8, 24] // Clean pill expansion (no distortion)
-                        });
-                        
-                        const dotOpacity = activeFactor.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [0.2, 0.9]
+                        const dotOpacity = scrollX.interpolate({
+                          inputRange,
+                          outputRange: virtualLists.map((_, j) => (j % lists.length === i) ? 0.9 : 0.2),
+                          extrapolate: 'clamp'
                         });
 
                         return (
