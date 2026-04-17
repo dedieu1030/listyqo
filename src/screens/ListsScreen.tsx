@@ -19,6 +19,10 @@ import Svg, { Path, Circle } from 'react-native-svg';
 
 /** Case à cocher et zone texte : même hauteur pour rester centrés sur l’axe vertical. */
 const TODAY_LINE_H = 22;
+/** Même `marginRight` que `styles.todayCheckbox` : espace case → texte. */
+const TODAY_CHECKBOX_GAP = 14;
+/** Décalage du bloc case + texte = place laissée au − à la place de la case (22 + 14). */
+const TODAY_DELETE_CONTENT_SHIFT = TODAY_LINE_H + TODAY_CHECKBOX_GAP;
 
 /** Même barre pour item saisi / item affiché : évite le saut au passage TextInput → Text. */
 function TodayFoodRow({
@@ -279,7 +283,7 @@ export const ListsScreen = ({ navigation }: any) => {
                               {
                                 translateX: todayDeleteAnim.interpolate({
                                   inputRange: [0, 1],
-                                  outputRange: [-22, 0],
+                                  outputRange: [-TODAY_DELETE_CONTENT_SHIFT, 0],
                                 }),
                               },
                             ],
@@ -298,7 +302,21 @@ export const ListsScreen = ({ navigation }: any) => {
                           </View>
                         </TouchableOpacity>
                       </Animated.View>
-                      <View style={styles.todayItemRow}>
+                      <Animated.View
+                        style={[
+                          styles.todayItemRow,
+                          {
+                            transform: [
+                              {
+                                translateX: todayDeleteAnim.interpolate({
+                                  inputRange: [0, 1],
+                                  outputRange: [0, TODAY_DELETE_CONTENT_SHIFT],
+                                }),
+                              },
+                            ],
+                          },
+                        ]}
+                      >
                         <TouchableOpacity
                           onPress={() => toggleTodayItem(item.id)}
                           activeOpacity={0.65}
@@ -333,7 +351,7 @@ export const ListsScreen = ({ navigation }: any) => {
                             returnKeyType="done"
                           />
                         </View>
-                      </View>
+                      </Animated.View>
                     </View>
                   ) : (
                     <TodayFoodRow onPress={() => toggleTodayItem(item.id)}>
@@ -445,17 +463,18 @@ const styles = StyleSheet.create({
   todayItemCell: {
     width: '100%',
   },
-  /** Conteneur : la ligne case + texte garde la même géométrie ; le − est en overlay à gauche. */
+  /** Aligné sur le même axe horizontal que la case (padding item = SCREEN_EDGE). */
   todayItemRowHost: {
     position: 'relative',
   },
   todayDeleteSlot: {
     position: 'absolute',
-    left: 2,
+    left: SCREEN_EDGE,
     top: 0,
     bottom: 0,
-    width: 22,
+    width: TODAY_LINE_H,
     justifyContent: 'center',
+    alignItems: 'center',
     zIndex: 2,
   },
   todayDeleteCircle: {
