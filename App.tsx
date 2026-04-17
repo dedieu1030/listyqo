@@ -70,8 +70,8 @@ export default function App() {
             borderTopWidth: 0,
             elevation: 0,
             shadowOpacity: 0,
-            height: 60,
-            paddingTop: 10,
+            height: 50,
+            paddingTop: 0,
           },
           tabBarLabelStyle: {
             fontFamily: 'Inter_600SemiBold', // Matches the small bold label
