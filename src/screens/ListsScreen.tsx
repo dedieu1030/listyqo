@@ -70,11 +70,11 @@ export const ListsScreen = ({ navigation }: any) => {
 
   const cardColors = ['#A5E3C1', '#36C185', '#57C693', '#F2AE72', '#EED8A1'];
 
-  // Infinite Carousel Logic
-  const BUFFER_SETS = 50;
+  // Static Lists
   const itemCount = lists.length;
   const isInfinite = itemCount >= 3;
-  
+  const BUFFER_SETS = 100;
+
   const virtualLists = React.useMemo(() => {
     if (itemCount === 0) return [];
     if (!isInfinite) {
@@ -95,42 +95,25 @@ export const ListsScreen = ({ navigation }: any) => {
 
   const initialIndex = isInfinite ? Math.floor(BUFFER_SETS / 2) * itemCount : 0;
 
-  const renderCarouselItem = (item: any, index: number) => {
-    const isCompleted = item.realIndex === 0;
+  const renderCarouselItem = (item: any, _index: number) => {
+    const realIdx = item.realIndex;
+    const isCompleted = realIdx === 0;
     
     const ITEM_WIDTH = width * 0.75;
-    const CARD_WIDTH = ITEM_WIDTH - 16; // 8px gap on each side inside the wrapper, reducing distance
+    const CARD_WIDTH = ITEM_WIDTH - 16;
     
-    // Snapping physics math
+    // We use a safe index for interpolation relative to the scroll offset
+    // In an infinite list, each item has a unique position (index * ITEM_WIDTH)
     const inputRange = [
-      (index - 1) * ITEM_WIDTH,
-      index * ITEM_WIDTH,
-      (index + 1) * ITEM_WIDTH,
+      (_index - 1) * ITEM_WIDTH,
+      _index * ITEM_WIDTH,
+      (_index + 1) * ITEM_WIDTH,
     ];
 
-    const scale = scrollX.interpolate({
-      inputRange,
-      outputRange: [0.92, 1, 0.92], // Not as small, closer to original size
-      extrapolate: 'clamp',
-    });
-
-    const translateY = scrollX.interpolate({
-      inputRange,
-      outputRange: [25, 0, 25], // Reduced the drop from 40 to 25
-      extrapolate: 'clamp',
-    });
-
-    const rotateY = scrollX.interpolate({
-      inputRange,
-      outputRange: ['-15deg', '0deg', '15deg'],
-      extrapolate: 'clamp',
-    });
-
-    const rotateX = scrollX.interpolate({
-      inputRange,
-      outputRange: ['15deg', '0deg', '15deg'],
-      extrapolate: 'clamp',
-    });
+    const scale = scrollX.interpolate({ inputRange, outputRange: [0.92, 1, 0.92], extrapolate: 'clamp' });
+    const translateY = scrollX.interpolate({ inputRange, outputRange: [25, 0, 25], extrapolate: 'clamp' });
+    const rotateY = scrollX.interpolate({ inputRange, outputRange: ['-15deg', '0deg', '15deg'], extrapolate: 'clamp' });
+    const rotateX = scrollX.interpolate({ inputRange, outputRange: ['15deg', '0deg', '15deg'], extrapolate: 'clamp' });
 
     return (
       <View style={{ width: ITEM_WIDTH, justifyContent: 'center', alignItems: 'center' }}>
@@ -138,7 +121,8 @@ export const ListsScreen = ({ navigation }: any) => {
           styles.carouselPhysicalCard, 
           { 
             width: CARD_WIDTH,
-            backgroundColor: cardColors[index % cardColors.length], 
+            // STABLE COLOR & TEXT: use realIdx, not _index
+            backgroundColor: cardColors[realIdx % cardColors.length], 
             transform: [
               { perspective: 850 }, 
               { scale }, 
@@ -153,17 +137,15 @@ export const ListsScreen = ({ navigation }: any) => {
             style={styles.carouselCardInner}
             onPress={() => navigation.navigate('ListDetails', { listId: item.id, listName: item.name })}
           >
-            {/* Top: Image/Daisy */}
             <View style={styles.carouselImageTop}>
                <MockDaisy size={65} />
             </View>
             
-            {/* Bottom: Info & Action */}
             <View style={styles.carouselBody}>
               <View>
                 <Text style={styles.carouselListTitle} numberOfLines={1}>{item.name}</Text>
                 <View style={styles.carouselMeta}>
-                  <Text style={styles.carouselLessonText}>Lesson {item.realIndex + 1}</Text>
+                  <Text style={styles.carouselLessonText}>Lesson {realIdx + 1}</Text>
                   {isCompleted && <CheckCircle size={20} color="#111" strokeWidth={2.5} />}
                 </View>
                 <Text style={styles.carouselDesc} numberOfLines={2}>Learn how to manage this list.</Text>
@@ -203,20 +185,14 @@ export const ListsScreen = ({ navigation }: any) => {
 
             <View style={styles.tabsRow}>
               <View>
-                <TouchableOpacity 
-                  style={styles.tabBtn}
-                  onPress={() => setActiveTab('today')}
-                >
+                <TouchableOpacity style={styles.tabBtn} onPress={() => setActiveTab('today')}>
                   <Text style={[styles.tabText, activeTab === 'today' && styles.tabTextActive]}>Today</Text>
                 </TouchableOpacity>
                 {activeTab === 'today' && <View style={styles.tabUnderline} />}
               </View>
               
               <View>
-                <TouchableOpacity 
-                  style={styles.tabBtn}
-                  onPress={() => setActiveTab('week')}
-                >
+                <TouchableOpacity style={styles.tabBtn} onPress={() => setActiveTab('week')}>
                   <Text style={[styles.tabText, activeTab === 'week' && styles.tabTextActive]}>Learning Plan</Text>
                 </TouchableOpacity>
                 {activeTab === 'week' && <View style={styles.tabUnderline} />}
@@ -264,39 +240,45 @@ export const ListsScreen = ({ navigation }: any) => {
                     <View style={styles.paginationRow}>
                       {lists.map((_, i) => {
                         const ITEM_WIDTH = width * 0.75;
-                        const inputRange = virtualLists.length > 1 
-                                           ? virtualLists.map((_, j) => j * ITEM_WIDTH) 
-                                           : [0, ITEM_WIDTH]; // padded for 1 item
+                        const len = lists.length;
+                        
+                        // "Effet Cercle" Indicator logic matching Icchub's modulo-sync
+                        // We map the active state over a range of scroll positions
+                        const inputRange = [];
+                        const outputRangeWidth = [];
+                        const outputRangeOpacity = [];
+                        
+                        // We map enough range to handle infinite scroll wrapping
+                        // In standard Animated, we map specifically the visible virtual indices
+                        // but a more generic approach is mapping the fractional current position.
                         
                         const dotWidth = scrollX.interpolate({
-                          inputRange,
-                          outputRange: virtualLists.length > 1 
-                                       ? virtualLists.map((_, j) => (j % lists.length === i) ? 24 : 8)
-                                       : [24, 24],
+                          inputRange: isInfinite 
+                            ? Array(11).fill(0).map((_, idx) => (initialIndex - 5 + idx) * ITEM_WIDTH)
+                            : lists.map((_, idx) => idx * ITEM_WIDTH),
+                          outputRange: isInfinite
+                            ? Array(11).fill(0).map((_, idx) => ((initialIndex - 5 + idx) % len) === i ? 24 : 8)
+                            : lists.map((_, idx) => idx === i ? 24 : 8),
                           extrapolate: 'clamp'
                         });
                         
                         const dotOpacity = scrollX.interpolate({
-                          inputRange,
-                          outputRange: virtualLists.length > 1 
-                                       ? virtualLists.map((_, j) => (j % lists.length === i) ? 0.9 : 0.2)
-                                       : [0.9, 0.9],
+                          inputRange: isInfinite 
+                            ? Array(11).fill(0).map((_, idx) => (initialIndex - 5 + idx) * ITEM_WIDTH)
+                            : lists.map((_, idx) => idx * ITEM_WIDTH),
+                          outputRange: isInfinite
+                            ? Array(11).fill(0).map((_, idx) => ((initialIndex - 5 + idx) % len) === i ? 0.9 : 0.2)
+                            : lists.map((_, idx) => idx === i ? 0.9 : 0.2),
                           extrapolate: 'clamp'
                         });
 
                         return (
                           <Animated.View 
                             key={i} 
-                            style={[
-                              styles.dot, 
-                              { width: dotWidth, opacity: dotOpacity }
-                            ]} 
+                            style={[styles.dot, { width: dotWidth, opacity: dotOpacity }]} 
                           />
                         );
                       })}
-                    </View>
-                    <Text style={styles.swipeText}>Swipe To Next List</Text>
-                  </View>
                 </View>
               ) : (
                 lists.map((list, index) => {
