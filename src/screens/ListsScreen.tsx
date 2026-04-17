@@ -1,5 +1,15 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Dimensions, Animated } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  TextInput,
+  Dimensions,
+  Animated,
+  Platform,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../theme/colors';
 import { useStore } from '../store';
@@ -10,6 +20,31 @@ const { width } = Dimensions.get('window');
 const CARD_WIDTH = width * 0.72;
 const SPACING = 16;
 const FULL_SIZE = CARD_WIDTH + SPACING;
+
+/** Case à cocher et zone texte : même hauteur pour rester centrés sur l’axe vertical. */
+const TODAY_LINE_H = 22;
+
+/** Même barre pour item saisi / item affiché : évite le saut au passage TextInput → Text. */
+function TodayFoodRow({
+  children,
+  onPress,
+}: {
+  children: React.ReactNode;
+  onPress?: () => void;
+}) {
+  if (onPress) {
+    return (
+      <TouchableOpacity
+        style={styles.todayItemRow}
+        onPress={onPress}
+        activeOpacity={0.65}
+      >
+        {children}
+      </TouchableOpacity>
+    );
+  }
+  return <View style={styles.todayItemRow}>{children}</View>;
+}
 
 // A decorative element mimicking the daisy from the reference image
 const MockDaisy = ({ size = 40, color = "#FFFFFF" }) => (
@@ -365,12 +400,7 @@ export const ListsScreen = ({ navigation }: any) => {
 
             <View style={styles.todayFoodList}>
               {todayItems.map((item) => (
-                <TouchableOpacity
-                  key={item.id}
-                  style={styles.todayItemRow}
-                  onPress={() => toggleTodayItem(item.id)}
-                  activeOpacity={0.65}
-                >
+                <TodayFoodRow key={item.id} onPress={() => toggleTodayItem(item.id)}>
                   <View
                     style={[
                       styles.todayCheckbox,
@@ -381,41 +411,48 @@ export const ListsScreen = ({ navigation }: any) => {
                       <Check size={14} color={Colors.white} strokeWidth={3} />
                     ) : null}
                   </View>
-                  <Text
-                    style={[styles.todayItemLabel, item.checked && styles.todayItemLabelDone]}
-                    numberOfLines={1}
-                  >
-                    {item.name}
-                  </Text>
-                </TouchableOpacity>
+                  <View style={styles.todayItemTextWrap}>
+                    <TextInput
+                      editable={false}
+                      pointerEvents="none"
+                      value={item.name}
+                      scrollEnabled={false}
+                      caretHidden
+                      selectTextOnFocus={false}
+                      numberOfLines={1}
+                      style={[styles.todayItemInput, item.checked && styles.todayItemLabelDone]}
+                      underlineColorAndroid="transparent"
+                    />
+                  </View>
+                </TodayFoodRow>
               ))}
 
               {newTodayItemMode ? (
-                <View style={[styles.todayItemRow, styles.todayAddRow]}>
+                <TodayFoodRow>
                   <View style={styles.todayCheckbox} />
-                  <TextInput
-                    style={styles.todayAddInput}
-                    value={newTodayItemName}
-                    onChangeText={setNewTodayItemName}
-                    placeholder="Add item"
-                    placeholderTextColor={Colors.textLight}
-                    onSubmitEditing={handleAddTodayItem}
-                    onBlur={handleAddTodayItem}
-                    returnKeyType="done"
-                    blurOnSubmit
-                    autoFocus
-                  />
-                </View>
+                  <View style={styles.todayItemTextWrap}>
+                    <TextInput
+                      style={styles.todayItemInput}
+                      value={newTodayItemName}
+                      onChangeText={setNewTodayItemName}
+                      placeholder=""
+                      onSubmitEditing={handleAddTodayItem}
+                      onBlur={handleAddTodayItem}
+                      returnKeyType="done"
+                      blurOnSubmit
+                      autoFocus
+                      multiline={false}
+                      numberOfLines={1}
+                      underlineColorAndroid="transparent"
+                    />
+                  </View>
+                </TodayFoodRow>
               ) : (
-                <TouchableOpacity
-                  style={[styles.todayItemRow, styles.todayPlusRow]}
-                  onPress={() => setNewTodayItemMode(true)}
-                  activeOpacity={0.65}
-                >
+                <TodayFoodRow onPress={() => setNewTodayItemMode(true)}>
                   <View style={styles.todayCheckboxSlot}>
                     <Plus size={20} color={Colors.textHeading} strokeWidth={2.2} />
                   </View>
-                </TouchableOpacity>
+                </TodayFoodRow>
               )}
             </View>
           </View>
@@ -467,57 +504,73 @@ const styles = StyleSheet.create({
   todayItemRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    minHeight: 52,
     paddingVertical: 14,
     paddingHorizontal: 24,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: Colors.border,
   },
   todayCheckbox: {
-    width: 22,
-    height: 22,
+    width: TODAY_LINE_H,
+    height: TODAY_LINE_H,
     borderRadius: 5,
     borderWidth: 1.5,
     borderColor: '#D8D6D0',
     marginRight: 14,
     alignItems: 'center',
     justifyContent: 'center',
+    alignSelf: 'center',
     backgroundColor: Colors.background,
   },
   todayCheckboxChecked: {
     borderColor: Colors.black,
     backgroundColor: Colors.black,
   },
-  todayItemLabel: {
-    flex: 1,
-    fontFamily: 'Inter_500Medium',
-    fontSize: 16,
-    lineHeight: 22,
-    color: Colors.textHeading,
-  },
   todayItemLabelDone: {
     textDecorationLine: 'line-through',
     color: Colors.textLight,
   },
-  todayCheckboxSlot: {
-    width: 22,
-    height: 22,
-    marginRight: 14,
-    alignItems: 'center',
+  /** Colonne texte : hauteur = case à cocher, pas d’étirement vertical sur la ligne. */
+  todayItemTextWrap: {
+    flex: 1,
+    height: TODAY_LINE_H,
+    alignSelf: 'center',
     justifyContent: 'center',
   },
-  todayAddRow: {
-    paddingVertical: 10,
-  },
-  todayAddInput: {
-    flex: 1,
+  /**
+   * iOS : ne pas mettre `lineHeight` sur TextInput monoligne — le moteur RN répartit mal l’espace
+   * (texte qui « saute » au 1er caractère). Voir github.com/facebook/react-native/issues/39145
+   * Android : lineHeight + textAlignVertical pour centrer comme la case.
+   */
+  todayItemInput: {
+    width: '100%',
+    height: TODAY_LINE_H,
     fontFamily: 'Inter_500Medium',
     fontSize: 16,
     color: Colors.textHeading,
-    paddingVertical: 4,
+    padding: 0,
     margin: 0,
+    borderWidth: 0,
+    ...Platform.select({
+      ios: {
+        paddingTop: 0,
+        paddingBottom: 0,
+      },
+      android: {
+        lineHeight: TODAY_LINE_H,
+        paddingVertical: 0,
+        textAlignVertical: 'center',
+        includeFontPadding: false,
+      },
+    }),
   },
-  todayPlusRow: {
-    minHeight: 48,
+  todayCheckboxSlot: {
+    width: TODAY_LINE_H,
+    height: TODAY_LINE_H,
+    marginRight: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
   },
 
   // Carousel Specific
