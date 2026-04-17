@@ -90,11 +90,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surfaceActive,
     borderRadius: 16,
     padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 3,
   },
   cardHeader: {
     flexDirection: 'row',

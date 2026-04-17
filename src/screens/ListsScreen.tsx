@@ -9,9 +9,6 @@ export const ListsScreen = ({ navigation }: any) => {
   const [newListMode, setNewListMode] = useState(false);
   const [newListName, setNewListName] = useState('');
   
-  // By default make the first item "active" to perfectly mimic the design mockup
-  const [activeId, setActiveId] = useState<string | null>(lists[0]?.id || null);
-
   const handleCreateList = () => {
     if (newListName.trim().length > 0) {
       addList(newListName.trim());
@@ -21,21 +18,15 @@ export const ListsScreen = ({ navigation }: any) => {
   };
 
   const renderItem = ({ item }: { item: any }) => {
-    const isActive = activeId === item.id;
-    
     return (
       <TouchableOpacity 
-        activeOpacity={0.9}
-        onPressIn={() => setActiveId(item.id)}
+        activeOpacity={0.7}
         onPress={() => {
-          setActiveId(item.id);
-          setTimeout(() => {
-            navigation.navigate('ListDetails', { listId: item.id, listName: item.name })
-          }, 150);
+          navigation.navigate('ListDetails', { listId: item.id, listName: item.name })
         }}
         style={[
           styles.card,
-          isActive ? styles.cardActive : styles.cardInactive
+          styles.cardInactive
         ]}
       >
         <ListTodo size={24} color={Colors.primary} strokeWidth={2} style={styles.cardIconLeft} />
@@ -148,11 +139,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surfaceActive,
     width: '94%', // Overhangs the inactive margins!
     // Very soft, high spread shadow giving that floating effect over white bg
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.08,
-    shadowRadius: 24,
-    elevation: 8,
   },
   cardIconLeft: {
     marginRight: 20,
@@ -188,11 +174,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingVertical: 16,
     borderRadius: 30,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
   },
   bottomCreateButtonText: {
     fontFamily: 'Inter_700Bold',
@@ -209,11 +190,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 12,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.1,
-    shadowRadius: 15,
-    elevation: 8,
     gap: 10,
   },
   input: {
