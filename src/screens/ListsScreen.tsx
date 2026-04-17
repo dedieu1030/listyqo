@@ -9,8 +9,6 @@ import {
   Dimensions,
   Animated,
   Platform,
-  Pressable,
-  Keyboard,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../theme/colors';
@@ -55,6 +53,7 @@ export const ListsScreen = ({ navigation }: any) => {
   const [newListName, setNewListName] = useState('');
 
   const [todayDraft, setTodayDraft] = useState('');
+  const todayDraftRef = useRef('');
   const todayAddInputRef = useRef<React.ComponentRef<typeof TextInput>>(null);
 
   const scrollX = useRef(new Animated.Value(0)).current;
@@ -67,13 +66,13 @@ export const ListsScreen = ({ navigation }: any) => {
     }
   };
 
-  const handleAddTodayItem = () => {
-    const name = todayDraft.trim();
+  const commitTodayDraft = React.useCallback(() => {
+    const name = todayDraftRef.current.trim();
     if (name.length === 0) return;
     addTodayItem(name);
+    todayDraftRef.current = '';
     setTodayDraft('');
-    Keyboard.dismiss();
-  };
+  }, [addTodayItem]);
 
   const locale = Intl.DateTimeFormat().resolvedOptions().locale;
   const now = new Date();
@@ -411,27 +410,28 @@ export const ListsScreen = ({ navigation }: any) => {
 
               <View>
                 <View style={[styles.todayItemInner, styles.todayComposerInner]}>
-                  <Pressable
+                  <TouchableOpacity
                     accessibilityLabel="Focus add item field"
                     onPress={() => todayAddInputRef.current?.focus()}
-                    style={({ pressed }) => [
-                      styles.todayCheckboxCell,
-                      styles.todayComposerLeading,
-                      pressed && styles.todayComposerPlusPressed,
-                    ]}
+                    style={[styles.todayCheckboxCell, styles.todayComposerLeading]}
+                    activeOpacity={0.7}
                   >
-                    <Plus size={20} color={Colors.textHeading} strokeWidth={2.5} />
-                  </Pressable>
+                    <View style={styles.todayCheckboxBox} />
+                  </TouchableOpacity>
                   <TextInput
                     ref={todayAddInputRef}
                     style={styles.todayAddInput}
                     value={todayDraft}
-                    onChangeText={setTodayDraft}
+                    onChangeText={(t) => {
+                      todayDraftRef.current = t;
+                      setTodayDraft(t);
+                    }}
                     placeholder="Add item..."
                     placeholderTextColor={Colors.textLight}
                     returnKeyType="done"
                     blurOnSubmit={false}
-                    onSubmitEditing={handleAddTodayItem}
+                    onSubmitEditing={commitTodayDraft}
+                    onBlur={() => setTimeout(commitTodayDraft, 0)}
                     multiline={false}
                     autoCorrect
                     autoCapitalize="sentences"
@@ -505,9 +505,6 @@ const styles = StyleSheet.create({
     paddingVertical: 0,
     paddingTop: 0,
     paddingBottom: 0,
-  },
-  todayComposerPlusPressed: {
-    opacity: 0.5,
   },
   todayCheckboxCell: {
     width: 32,
