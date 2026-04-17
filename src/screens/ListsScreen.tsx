@@ -89,12 +89,28 @@ export const ListsScreen = ({ navigation }: any) => {
   }, [activeTab]);
 
   useEffect(() => {
-    Animated.timing(todayDeleteAnim, {
-      toValue: isTodayEditing ? 1 : 0,
-      duration: 280,
-      easing: Easing.out(Easing.cubic),
-      useNativeDriver: true,
-    }).start();
+    todayDeleteAnim.stopAnimation();
+
+    if (!isTodayEditing) {
+      Animated.timing(todayDeleteAnim, {
+        toValue: 0,
+        duration: 240,
+        easing: Easing.in(Easing.cubic),
+        useNativeDriver: true,
+      }).start();
+      return;
+    }
+
+    todayDeleteAnim.setValue(0);
+    const frame = requestAnimationFrame(() => {
+      Animated.timing(todayDeleteAnim, {
+        toValue: 1,
+        duration: 280,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }).start();
+    });
+    return () => cancelAnimationFrame(frame);
   }, [isTodayEditing, todayDeleteAnim]);
 
   const handleCreateList = () => {
