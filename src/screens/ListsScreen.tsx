@@ -91,7 +91,7 @@ export const ListsScreen = ({ navigation }: any) => {
 
     const translateY = scrollX.interpolate({
       inputRange,
-      outputRange: [40, 0, 40], // Reduced the drop from 70 to 40
+      outputRange: [25, 0, 25], // Reduced the drop from 40 to 25
       extrapolate: 'clamp',
     });
 
