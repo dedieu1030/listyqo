@@ -97,7 +97,7 @@ export const ListsScreen = ({ navigation }: any) => {
 
     const rotateX = scrollX.interpolate({
       inputRange,
-      outputRange: ['-15deg', '0deg', '-15deg'], // Negative rotates the top backwards
+      outputRange: ['15deg', '0deg', '15deg'], // Positive pushes the top backwards
       extrapolate: 'clamp',
     });
 
