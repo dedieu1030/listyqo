@@ -375,7 +375,7 @@ export const ListsScreen = ({ navigation }: any) => {
 
             <View style={styles.todayListBlock}>
               {todayItems.map((item) => (
-                <View key={item.id} style={styles.todayItemOuter}>
+                <View key={item.id}>
                   <View style={styles.todayItemInner}>
                     <TouchableOpacity
                       onPress={() => toggleTodayItem(item.id)}
@@ -405,10 +405,11 @@ export const ListsScreen = ({ navigation }: any) => {
                       </Text>
                     </TouchableOpacity>
                   </View>
+                  <View style={styles.todayDividerInset} />
                 </View>
               ))}
 
-              <View style={styles.todayItemOuter}>
+              <View>
                 <View style={[styles.todayItemInner, styles.todayComposerInner]}>
                   <Pressable
                     accessibilityLabel="Focus add item field"
@@ -486,9 +487,11 @@ const styles = StyleSheet.create({
   todayListBlock: {
     paddingBottom: 24,
   },
-  todayItemOuter: {
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: Colors.border,
+  /** Same horizontal bounds as `todayItemInner` (24), not edge-to-edge screen */
+  todayDividerInset: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: Colors.border,
+    marginHorizontal: 24,
   },
   todayItemInner: {
     flexDirection: 'row',
