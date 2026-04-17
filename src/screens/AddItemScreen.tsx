@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../theme/colors';
+import { SCREEN_EDGE, stackHeaderBar, stackHeaderTitleText } from '../theme/layout';
 import { useStore } from '../store';
 import { ChevronLeft, Plus } from 'lucide-react-native';
 
@@ -22,11 +23,11 @@ export const AddItemScreen = ({ route, navigation }: any) => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
+      <View style={stackHeaderBar}>
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <ChevronLeft size={28} color={Colors.black} strokeWidth={2} />
         </TouchableOpacity>
-        <Text style={styles.title}>Add Item</Text>
+        <Text style={[stackHeaderTitleText, styles.headerTitle]}>Add Item</Text>
         <View style={styles.headerRight} />
       </View>
 
@@ -66,28 +67,19 @@ export const AddItemScreen = ({ route, navigation }: any) => {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: Colors.background },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: 10,
-    paddingBottom: 20,
-  },
   backButton: {
     padding: 4,
     width: 40,
   },
-  title: {
-    fontFamily: 'Inter_800ExtraBold',
-    fontSize: 24,
-    color: Colors.textHeading,
+  headerTitle: {
+    flex: 1,
+    textAlign: 'center',
   },
   headerRight: {
     width: 40,
   },
   inputContainer: {
-    marginHorizontal: 20,
+    marginHorizontal: SCREEN_EDGE,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.surface,
@@ -112,7 +104,7 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   suggestionsContainer: {
-    paddingHorizontal: 20,
+    paddingHorizontal: SCREEN_EDGE,
   },
   suggestionsTitle: {
     fontFamily: 'Inter_600SemiBold',

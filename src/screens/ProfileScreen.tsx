@@ -2,13 +2,15 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../theme/colors';
+import { SCREEN_EDGE, tabRootHeaderRow, tabRootTitleText } from '../theme/layout';
 import { User, Settings, Sparkles, Heart } from 'lucide-react-native';
 
 export const ProfileScreen = ({ navigation }: any) => {
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Profile</Text>
+      <View style={tabRootHeaderRow} accessibilityRole="header">
+        <Text style={tabRootTitleText}>Discover</Text>
+        <User size={28} color={Colors.textHeading} strokeWidth={2} />
       </View>
 
       <View style={styles.content}>
@@ -54,18 +56,8 @@ export const ProfileScreen = ({ navigation }: any) => {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: Colors.background },
-  header: {
-    paddingHorizontal: 24,
-    paddingTop: 20,
-    paddingBottom: 24,
-  },
-  title: {
-    fontFamily: 'Inter_800ExtraBold',
-    fontSize: 32,
-    color: Colors.textHeading,
-  },
   content: {
-    paddingHorizontal: 20,
+    paddingHorizontal: SCREEN_EDGE,
   },
   userCard: {
     flexDirection: 'row',

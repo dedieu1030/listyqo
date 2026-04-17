@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../theme/colors';
+import { SCREEN_EDGE, tabRootTitleText } from '../theme/layout';
 import { useStore } from '../store';
 import { User, ChevronUp, CheckCircle, Plus, Check } from 'lucide-react-native';
 import Svg, { Path, Circle } from 'react-native-svg';
@@ -102,10 +103,10 @@ export const ListsScreen = ({ navigation }: any) => {
     <SafeAreaView style={styles.safeArea}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         
-        {/* Header Area */}
+        {/* En-tête : salutation + onglets (référence actuelle conservée). */}
         <View style={styles.headerArea}>
           <View style={styles.topHeaderRow}>
-            <Text style={styles.mainTitle}>Hi, Jamie</Text>
+            <Text style={tabRootTitleText}>Hi, Jamie</Text>
             <User size={28} color="#111" strokeWidth={2} />
           </View>
 
@@ -273,9 +274,8 @@ export const ListsScreen = ({ navigation }: any) => {
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#FFFFFF' },
   scrollContent: { paddingBottom: 40 },
-  headerArea: { paddingHorizontal: 24, paddingTop: 20, paddingBottom: 20 },
+  headerArea: { paddingHorizontal: SCREEN_EDGE, paddingTop: 20, paddingBottom: 20 },
   topHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
-  mainTitle: { fontFamily: 'Lora_700Bold', fontSize: 40, color: '#111' },
   tabsContainer: { flexDirection: 'row', alignItems: 'center' },
   tabsRow: { flexDirection: 'row', gap: 28 },
   tabBtn: { paddingBottom: 6 },

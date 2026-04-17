@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Switch } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../theme/colors';
+import { SCREEN_EDGE, stackHeaderBar, stackHeaderTitleText } from '../theme/layout';
 import { ChevronLeft } from 'lucide-react-native';
 
 export const SettingsScreen = ({ navigation }: any) => {
@@ -11,11 +12,11 @@ export const SettingsScreen = ({ navigation }: any) => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
+      <View style={stackHeaderBar}>
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <ChevronLeft size={28} color={Colors.black} strokeWidth={2} />
         </TouchableOpacity>
-        <Text style={styles.title}>Settings</Text>
+        <Text style={[stackHeaderTitleText, styles.headerTitle]}>Settings</Text>
         <View style={styles.headerRight} />
       </View>
 
@@ -66,23 +67,13 @@ export const SettingsScreen = ({ navigation }: any) => {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: Colors.primary },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: 10,
-    paddingBottom: 20,
-    backgroundColor: Colors.background,
-  },
   backButton: {
     padding: 4,
     width: 40,
   },
-  title: {
-    fontFamily: 'Inter_600SemiBold',
-    fontSize: 18,
-    color: Colors.textHeading,
+  headerTitle: {
+    flex: 1,
+    textAlign: 'center',
   },
   headerRight: {
     width: 40,
@@ -90,7 +81,7 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     backgroundColor: Colors.background,
-    paddingHorizontal: 24,
+    paddingHorizontal: SCREEN_EDGE,
   },
   subtitle: {
     fontFamily: 'Inter_800ExtraBold',

@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft, ChevronRight, Flame } from 'lucide-react-native';
+import { SCREEN_EDGE, tabRootHeaderRow, tabRootTitleText } from '../theme/layout';
 
 /** Couleurs calibrées sur la maquette « Streak » (juin, flammes, pastilles). */
 const streakPeachBg = '#FFF0EB';
@@ -95,13 +96,15 @@ export const PlanScreen = () => {
 
   return (
     <SafeAreaView style={styles.safe}>
+      <View style={tabRootHeaderRow} accessibilityRole="header">
+        <Text style={tabRootTitleText}>Streak</Text>
+        <View style={styles.headerRightSpacer} />
+      </View>
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.title}>Streak</Text>
-
         <View style={styles.monthRow}>
           <Text style={styles.monthText}>{monthLabel}</Text>
           <View style={styles.monthNav}>
@@ -176,15 +179,10 @@ const styles = StyleSheet.create({
   },
   scroll: { flex: 1 },
   scrollContent: {
-    paddingHorizontal: 24,
+    paddingHorizontal: SCREEN_EDGE,
     paddingBottom: 32,
   },
-  title: {
-    fontFamily: 'Lora_700Bold',
-    fontSize: 36,
-    color: '#111',
-    marginBottom: 20,
-  },
+  headerRightSpacer: { width: 28 },
   monthRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',

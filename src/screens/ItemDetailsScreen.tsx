@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../theme/colors';
+import { SCREEN_EDGE, stackHeaderBar, stackHeaderTitleText } from '../theme/layout';
 import { useStore } from '../store';
 import { ChevronLeft, Minus, Plus } from 'lucide-react-native';
 
@@ -30,12 +31,12 @@ export const ItemDetailsScreen = ({ route, navigation }: any) => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
+      <View style={stackHeaderBar}>
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <ChevronLeft size={28} color={Colors.black} strokeWidth={2} />
         </TouchableOpacity>
-        <Text style={styles.title}>Edit Item</Text>
-        <TouchableOpacity onPress={handleSave}>
+        <Text style={[stackHeaderTitleText, styles.headerTitle]}>Edit Item</Text>
+        <TouchableOpacity style={styles.headerRight} onPress={handleSave}>
           <Text style={styles.saveText}>Save</Text>
         </TouchableOpacity>
       </View>
@@ -94,19 +95,15 @@ export const ItemDetailsScreen = ({ route, navigation }: any) => {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: Colors.background },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: 10,
-    paddingBottom: 20,
+  backButton: { padding: 4, width: 40 },
+  headerTitle: {
+    flex: 1,
+    textAlign: 'center',
   },
-  backButton: { padding: 4 },
-  title: {
-    fontFamily: 'Inter_800ExtraBold',
-    fontSize: 20,
-    color: Colors.textHeading,
+  headerRight: {
+    minWidth: 40,
+    alignItems: 'flex-end',
+    justifyContent: 'center',
   },
   saveText: {
     fontFamily: 'Inter_600SemiBold',
@@ -114,7 +111,7 @@ const styles = StyleSheet.create({
     color: Colors.primary,
   },
   form: {
-    paddingHorizontal: 20,
+    paddingHorizontal: SCREEN_EDGE,
     paddingTop: 20,
     gap: 24,
   },

@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../theme/colors';
+import { stackHeaderBar, stackHeaderTitleText } from '../theme/layout';
 import { useStore } from '../store';
 import { Trash, Share, Plus, Check } from 'lucide-react-native';
 
@@ -87,7 +88,7 @@ export const ListDetailsScreen = ({ route, navigation }: any) => {
         style={styles.container} 
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <View style={styles.header}>
+        <View style={stackHeaderBar}>
           <TouchableOpacity 
             style={styles.headerIcon} 
             onPress={() => {
@@ -98,7 +99,9 @@ export const ListDetailsScreen = ({ route, navigation }: any) => {
             <Trash color={Colors.accentRed} size={24} strokeWidth={2} />
           </TouchableOpacity>
           
-          <Text style={styles.title} numberOfLines={1}>List</Text>
+          <Text style={[stackHeaderTitleText, styles.headerTitle]} numberOfLines={1}>
+            {listName}
+          </Text>
 
           {isEditing ? (
             <TouchableOpacity 
@@ -149,24 +152,11 @@ export const ListDetailsScreen = ({ route, navigation }: any) => {
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: Colors.background },
   container: { flex: 1 },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-  },
   headerIcon: {
     width: 60,
     alignItems: 'flex-start',
   },
-  title: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 20,
-    color: Colors.black,
+  headerTitle: {
     flex: 1,
     textAlign: 'center',
   },
