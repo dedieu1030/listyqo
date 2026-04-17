@@ -63,10 +63,15 @@ export const ListsScreen = ({ navigation }: any) => {
     }
   };
 
-  const todayDate = new Date().toLocaleDateString('en-US', {
-    weekday: 'long',
+  const locale = Intl.DateTimeFormat().resolvedOptions().locale;
+  const now = new Date();
+  const weekdayRaw = now.toLocaleDateString(locale, { weekday: 'long' });
+  const todayWeekday =
+    weekdayRaw.charAt(0).toLocaleUpperCase(locale) + weekdayRaw.slice(1);
+  const todayFullDate = now.toLocaleDateString(locale, {
+    day: 'numeric',
     month: 'long',
-    day: 'numeric'
+    year: 'numeric',
   });
 
   const cardColors = ['#A5E3C1', '#36C185', '#57C693', '#F2AE72', '#EED8A1'];
@@ -347,11 +352,9 @@ export const ListsScreen = ({ navigation }: any) => {
         {/* TODAY Section placeholder remains same scale but also supports swap? Minimalist logic for now */}
         {activeTab === 'today' && (
           <View style={styles.contentSection}>
-            <View style={styles.sectionHeader}>
-              <View>
-                <Text style={styles.sectionTitle}>Daily List</Text>
-                <Text style={styles.dateText}>{todayDate}</Text>
-              </View>
+            <View style={styles.todayDateHeader}>
+              <Text style={styles.todayWeekday}>{todayWeekday}</Text>
+              <Text style={styles.todayFullDate}>{todayFullDate}</Text>
             </View>
             {/* List for today items as updated before */}
             {todayItems.map((item, index) => (
@@ -391,7 +394,25 @@ const styles = StyleSheet.create({
   contentSection: { flex: 1 },
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 24, paddingVertical: 24 },
   sectionTitle: { fontFamily: 'Inter_800ExtraBold', fontSize: 26, lineHeight: 32, color: '#111' },
-  dateText: { fontFamily: 'Inter_500Medium', fontSize: 16, color: '#8A8A8A', marginTop: 4 },
+  todayDateHeader: {
+    paddingHorizontal: 24,
+    paddingTop: 8,
+    paddingBottom: 20,
+    alignItems: 'flex-start',
+  },
+  todayWeekday: {
+    fontFamily: 'Lora_700Bold',
+    fontSize: 28,
+    lineHeight: 34,
+    color: Colors.textHeading,
+  },
+  todayFullDate: {
+    fontFamily: 'Inter_500Medium',
+    fontSize: 15,
+    lineHeight: 22,
+    color: Colors.textLight,
+    marginTop: 6,
+  },
   
   // Carousel Specific
   carouselPhysicalCard: {

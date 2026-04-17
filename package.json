@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "main": "index.ts",
   "scripts": {
-    "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web"
+    "start": "env -u CI -u EXPO_NO_QR_CODE expo start",
+    "start:tunnel": "env -u CI -u EXPO_NO_QR_CODE expo start --tunnel",
+    "android": "env -u CI -u EXPO_NO_QR_CODE expo start --android",
+    "ios": "env -u CI -u EXPO_NO_QR_CODE expo start --ios",
+    "web": "env -u CI -u EXPO_NO_QR_CODE expo start --web"
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",

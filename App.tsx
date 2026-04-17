@@ -67,13 +67,14 @@ export default function App() {
           sceneStyle: { backgroundColor: Colors.background },
           tabBarStyle: {
             backgroundColor: Colors.tabBarBackground,
-            borderTopWidth: 0,
+            borderTopColor: Colors.border,
+            borderTopWidth: 1,
             elevation: 0,
             shadowOpacity: 0,
-            height: 45,
+            height: 85,
           },
           tabBarItemStyle: {
-            paddingTop: 0,
+            paddingTop: 4,
             justifyContent: 'flex-start',
           },
           tabBarIconStyle: {
@@ -82,7 +83,7 @@ export default function App() {
           tabBarLabelStyle: {
             fontFamily: 'Inter_600SemiBold', // Matches the small bold label
             fontSize: 10,
-            marginTop: -2, // Pull label up too
+            marginTop: 0,
           }
         }}
       >
