@@ -390,8 +390,15 @@ const styles = StyleSheet.create({
   carouselDesc: { fontFamily: 'Inter_500Medium', fontSize: 16, color: '#444', lineHeight: 22, marginTop: 12, marginBottom: 24 },
   carouselActionRow: { alignItems: 'center' },
   btnPrimaryCarousel: { backgroundColor: '#111', paddingVertical: 16, paddingHorizontal: 40, borderRadius: 30, alignItems: 'center' },
-  carouselFooter: { alignItems: 'center', paddingBottom: 40, marginTop: 10 },
-  paginationRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 20 },
+  carouselFooter: { 
+    position: 'absolute',
+    bottom: 25, // Sits precisely inside the flatlist's paddingBottom space, just below the central card
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    pointerEvents: 'none'
+  },
+  paginationRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
   dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#111', marginHorizontal: 8 },
   swipeText: { fontFamily: 'Inter_600SemiBold', fontSize: 13, color: '#8A8A8A' },
 
