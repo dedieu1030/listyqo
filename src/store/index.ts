@@ -19,6 +19,7 @@ export interface GroceryList {
 
 interface StoreState {
   lists: GroceryList[];
+  todayItems: ListItem[];
   addList: (name: string) => void;
   deleteList: (id: string) => void;
   renameList: (id: string, newName: string) => void;
@@ -26,12 +27,18 @@ interface StoreState {
   updateItemInList: (listId: string, itemId: string, itemUpdates: Partial<ListItem>) => void;
   deleteItemFromList: (listId: string, itemId: string) => void;
   toggleItemChecked: (listId: string, itemId: string) => void;
+  
+  // Today section actions
+  addTodayItem: (name: string) => void;
+  toggleTodayItem: (id: string) => void;
+  deleteTodayItem: (id: string) => void;
 }
 
 export const useStore = create<StoreState>()(
   persist(
     (set) => ({
       lists: [],
+      todayItems: [],
       
       addList: (name) => set((state) => ({
         lists: [
@@ -84,6 +91,23 @@ export const useStore = create<StoreState>()(
             }
           : list
         )
+      })),
+
+      addTodayItem: (name) => set((state) => ({
+        todayItems: [
+          ...state.todayItems,
+          { id: Date.now().toString(), name, checked: false, quantity: 1, unit: 'pc' }
+        ]
+      })),
+
+      toggleTodayItem: (id) => set((state) => ({
+        todayItems: state.todayItems.map(item => 
+          item.id === id ? { ...item, checked: !item.checked } : item
+        )
+      })),
+
+      deleteTodayItem: (id) => set((state) => ({
+        todayItems: state.todayItems.filter(item => item.id !== id)
       })),
     }),
     {
