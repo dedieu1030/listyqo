@@ -1,5 +1,4 @@
 import React from 'react';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -57,7 +56,6 @@ export default function App() {
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
     <SafeAreaProvider>
       <NavigationContainer>
         <StatusBar style="dark" />
@@ -116,6 +114,5 @@ export default function App() {
       </Tab.Navigator>
     </NavigationContainer>
     </SafeAreaProvider>
-    </GestureHandlerRootView>
   );
 }

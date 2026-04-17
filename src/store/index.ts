@@ -32,7 +32,7 @@ interface StoreState {
   addTodayItem: (name: string) => void;
   toggleTodayItem: (id: string) => void;
   deleteTodayItem: (id: string) => void;
-  setTodayItems: (items: ListItem[]) => void;
+  updateTodayItem: (id: string, updates: Partial<ListItem>) => void;
 }
 
 export const useStore = create<StoreState>()(
@@ -111,7 +111,11 @@ export const useStore = create<StoreState>()(
         todayItems: state.todayItems.filter(item => item.id !== id)
       })),
 
-      setTodayItems: (todayItems) => set({ todayItems }),
+      updateTodayItem: (id, updates) => set((state) => ({
+        todayItems: state.todayItems.map(item =>
+          item.id === id ? { ...item, ...updates } : item
+        ),
+      })),
     }),
     {
       name: 'listyqo-storage',
